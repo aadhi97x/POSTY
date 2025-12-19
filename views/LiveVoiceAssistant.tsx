@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import { Mic, MicOff, X, Waves, Volume2, ShieldCheck, Loader2, Sparkles } from "lucide-react";
 import { getAI, decodeAudio, decodeAudioData, createBlobFromPCM } from "../services/geminiService";
@@ -62,18 +61,23 @@ export default function LiveVoiceAssistant({ onClose }: LiveVoiceAssistantProps)
             scriptProcessor.connect(audioContextIn.current!.destination);
           },
           onmessage: async (message: LiveServerMessage) => {
-            if (message.serverContent?.outputTranscription) {
-              setTranscription(prev => prev + message.serverContent!.outputTranscription!.text);
+            const serverContent = message.serverContent;
+            if (!serverContent) return;
+
+            if (serverContent.outputTranscription) {
+              setTranscription(prev => prev + (serverContent.outputTranscription?.text || ""));
             }
-            if (message.serverContent?.inputTranscription) {
-              setUserTranscription(prev => prev + message.serverContent!.inputTranscription!.text);
+            if (serverContent.inputTranscription) {
+              setUserTranscription(prev => prev + (serverContent.inputTranscription?.text || ""));
             }
-            if (message.serverContent?.turnComplete) {
+            if (serverContent.turnComplete) {
               setTranscription("");
               setUserTranscription("");
             }
 
-            const base64Audio = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
+            const modelTurn = serverContent.modelTurn;
+            const base64Audio = modelTurn?.parts?.[0]?.inlineData?.data;
+            
             if (base64Audio && audioContextOut.current) {
               nextStartTime.current = Math.max(nextStartTime.current, audioContextOut.current.currentTime);
               const buffer = await decodeAudioData(decodeAudio(base64Audio), audioContextOut.current, 24000, 1);
@@ -86,7 +90,7 @@ export default function LiveVoiceAssistant({ onClose }: LiveVoiceAssistantProps)
               sourceNode.onended = () => sources.current.delete(sourceNode);
             }
 
-            if (message.serverContent?.interrupted) {
+            if (serverContent.interrupted) {
               sources.current.forEach(s => {
                 try { s.stop(); } catch(e) {}
               });
@@ -101,7 +105,6 @@ export default function LiveVoiceAssistant({ onClose }: LiveVoiceAssistantProps)
           }
         },
         config: {
-          // Fix: Use Modality.AUDIO enum instead of string literal to satisfy type checker.
           responseModalities: [Modality.AUDIO],
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } } },
           systemInstruction: 'You are Dak-Mitra, the India Post official voice assistant. Help citizens with tracking, grievances, and postal rules. Be professional and helpful.',
