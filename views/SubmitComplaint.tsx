@@ -123,7 +123,7 @@ const SubmitComplaint: React.FC<SubmitProps> = ({ user, onSubmit, existingCompla
     
     try {
       const context = existingComplaints.slice(0, 3).map(c => c.description).join('\n');
-      // Fix: Passing exactly one object argument as required by the interface.
+      // Pass exactly one object to match the analyzeComplaint signature.
       const analysis = await analyzeComplaint({
         description,
         imageBase64: image || undefined,

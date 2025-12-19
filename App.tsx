@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { 
-  LogOut, Sun, Moon, Search, UserCircle, Bell, Mic, Mail
+  LogOut, Sun, Moon, Search, UserCircle, Bell, Mic, Mail, Loader2, Sparkles
 } from 'lucide-react';
 
 import { User, Complaint, Notification, ComplaintStatus } from './types';
@@ -221,8 +220,8 @@ const OfficialHeader = ({
              <span>GOVERNMENT OF INDIA</span>
           </div>
           <div className="flex items-center gap-4 text-slate-600 dark:text-slate-400">
-            <button onClick={onOpenLive} className="flex items-center gap-1.5 hover:text-indiapost-red font-black uppercase tracking-tighter">
-              <Mic size={12} /> Live Voice
+            <button onClick={onOpenLive} className="flex items-center gap-1.5 hover:text-indiapost-red font-black uppercase tracking-tighter text-indiapost-red">
+              <Mic size={12} className="animate-pulse" /> Live Voice
             </button>
             <div className="h-3 w-px bg-slate-200 dark:bg-slate-800"></div>
             <button onClick={() => setLang(lang === 'en' ? 'hi' : 'en')} className="hover:text-indiapost-red font-bold transition-colors">
@@ -330,12 +329,32 @@ const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [lang, setLang] = useState<Language>('en');
   const [isLiveOpen, setIsLiveOpen] = useState(false);
+  const [isLoadingBackend, setIsLoadingBackend] = useState(true);
 
+  // Sync with Backend
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
-    const savedComplaints = localStorage.getItem('complaints');
     if (savedUser) setUser(JSON.parse(savedUser));
-    if (savedComplaints) setComplaints(JSON.parse(savedComplaints));
+
+    const syncComplaints = async () => {
+      try {
+        const res = await fetch('/api/complaints');
+        if (res.ok) {
+          const data = await res.json();
+          setComplaints(data);
+        } else {
+          const savedComplaints = localStorage.getItem('complaints');
+          if (savedComplaints) setComplaints(JSON.parse(savedComplaints));
+        }
+      } catch (e) {
+        console.error("Backend offline, using local storage");
+        const savedComplaints = localStorage.getItem('complaints');
+        if (savedComplaints) setComplaints(JSON.parse(savedComplaints));
+      } finally {
+        setIsLoadingBackend(false);
+      }
+    };
+    syncComplaints();
   }, []);
 
   const handleLogin = (newUser: User) => {
@@ -348,19 +367,45 @@ const App: React.FC = () => {
     localStorage.removeItem('user');
   };
 
-  const handleUpdateComplaints = (updated: Complaint[]) => {
+  const handleUpdateComplaints = async (updated: Complaint[]) => {
     setComplaints(updated);
     localStorage.setItem('complaints', JSON.stringify(updated));
+    try {
+      await fetch('/api/complaints', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'UPDATE_LIST', complaints: updated })
+      });
+    } catch (e) {}
   };
 
-  const handleUpdateFeedback = (id: string, rating: number, comment: string) => {
-    const updated = complaints.map(c => c.id === id ? { ...c, feedback: { rating, comment, timestamp: new Date().toISOString() } } : c);
-    handleUpdateComplaints(updated);
+  const handleUpdateFeedback = async (id: string, rating: number, comment: string) => {
+    const timestamp = new Date().toISOString();
+    const updated = complaints.map(c => c.id === id ? { ...c, feedback: { rating, comment, timestamp } } : c);
+    setComplaints(updated);
+    localStorage.setItem('complaints', JSON.stringify(updated));
+    
+    try {
+      await fetch('/api/complaints', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'UPDATE_FEEDBACK', id, rating, comment, timestamp })
+      });
+    } catch (e) {}
   };
 
-  const addComplaint = (newComplaint: Complaint) => {
+  const addComplaint = async (newComplaint: Complaint) => {
     const updated = [newComplaint, ...complaints];
-    handleUpdateComplaints(updated);
+    setComplaints(updated);
+    localStorage.setItem('complaints', JSON.stringify(updated));
+
+    try {
+      await fetch('/api/complaints', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'CREATE', complaint: newComplaint })
+      });
+    } catch (e) {}
   };
 
   const markNotificationsRead = () => {
@@ -374,6 +419,24 @@ const App: React.FC = () => {
   };
 
   const t = translations[lang];
+
+  if (isLoadingBackend) {
+    return (
+      <div className="fixed inset-0 bg-white dark:bg-black flex flex-col items-center justify-center gap-8">
+        <div className="relative">
+           <IndiaPostLogo className="h-16 animate-pulse" />
+           <Sparkles className="absolute -top-4 -right-4 text-indiapost-red animate-bounce" />
+        </div>
+        <div className="flex flex-col items-center gap-4">
+           <div className="flex items-center gap-3">
+              <Loader2 className="animate-spin text-indiapost-red" size={24} />
+              <p className="text-xs font-black uppercase tracking-[0.5em] text-slate-400">Neural Sync In Progress</p>
+           </div>
+           <p className="text-[10px] font-bold text-slate-300 uppercase">Synchronizing Official Grievance Records...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <LangContext.Provider value={{ lang, setLang, t }}>

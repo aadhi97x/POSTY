@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { GoogleGenAI, Modality } from "@google/genai";
+import { GoogleGenAI, Modality, LiveServerMessage } from "@google/genai";
 
 /**
  * Note: Standard Vercel Serverless Functions do not support persistent WebSockets.
@@ -14,23 +14,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
   
   try {
-     // ai.live.connect requires a model and a callbacks object.
-     const _session = ai.live.connect({
+     // Properly structured Live API connect call to satisfy TypeScript interfaces.
+     const _sessionPromise = ai.live.connect({
         model: 'gemini-2.5-flash-native-audio-preview-09-2025',
         callbacks: {
-           onopen: () => { console.log("Session opened"); },
-           onmessage: (msg) => { console.log("Message received", msg); },
-           onclose: () => { console.log("Session closed"); },
-           onerror: (err) => { console.error("Session error", err); }
+           onopen: () => { console.debug("Live link established"); },
+           onmessage: (_msg: LiveServerMessage) => { console.debug("Message processed"); },
+           onclose: () => { console.debug("Live link terminated"); },
+           onerror: (err: any) => { console.error("Neural link error", err); }
         },
         config: {
            responseModalities: [Modality.AUDIO],
-           systemInstruction: 'You are a helpful assistant.'
+           systemInstruction: 'You are Dak-Mitra, a professional India Post official assistant.'
         }
      });
 
-     return res.status(200).json({ message: "Gemini Live endpoint initialized. Use browser SDK for real-time audio." });
+     return res.status(200).json({ message: "Gemini Live API interface ready." });
   } catch (e) {
-     return res.status(500).json({ error: "Failed to initialize Live API" });
+     return res.status(500).json({ error: "Neural link initialization failed." });
   }
 }
