@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, Bot, Loader2, Mic, MicOff, Volume2, ExternalLink, Waves } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, Loader2, Mic, ExternalLink, Waves } from 'lucide-react';
 import { getQuickSupport, generateSpeech, decodeAudio, decodeAudioData } from '../services/geminiService';
 import { Complaint, GroundingLink } from '../types';
 
@@ -37,17 +36,21 @@ const ChatAssistant: React.FC<ChatProps> = ({ complaints = [] }) => {
   }, [messages]);
 
   const speakResponse = async (text: string) => {
-    const audioBase64 = await generateSpeech(text);
-    if (audioBase64) {
-      if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+    try {
+      const audioBase64 = await generateSpeech(text);
+      if (audioBase64) {
+        if (!audioContextRef.current) {
+          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+        }
+        const ctx = audioContextRef.current;
+        const buffer = await decodeAudioData(decodeAudio(audioBase64), ctx, 24000, 1);
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(ctx.destination);
+        source.start();
       }
-      const ctx = audioContextRef.current;
-      const buffer = await decodeAudioData(decodeAudio(audioBase64), ctx, 24000, 1);
-      const source = ctx.createBufferSource();
-      source.buffer = buffer;
-      source.connect(ctx.destination);
-      source.start();
+    } catch (e) {
+      console.warn("Speech generation failed", e);
     }
   };
 
@@ -65,7 +68,7 @@ const ChatAssistant: React.FC<ChatProps> = ({ complaints = [] }) => {
     try {
       const response = await getQuickSupport(userText, userHistory);
       const botMsg = response.text || "I'm sorry, I couldn't process that.";
-      setMessages(prev => [...prev, { role: 'bot', text: botMsg, links: response.links }]);
+      setMessages(prev => [...prev, { role: 'bot', text: botMsg, links: response.links as GroundingLink[] }]);
       speakResponse(botMsg);
     } catch (error) {
       setMessages(prev => [...prev, { role: 'bot', text: "Technical issue. Please try again later." }]);

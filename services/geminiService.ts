@@ -2,13 +2,22 @@ import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { GroundingLink } from "../types";
 
 // --- INITIALIZATION ---
-const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+export const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 /* -------------------------------
-   AUDIO UTILS (Browser-only)
+   AUDIO UTILS
 -------------------------------- */
 
-export const decodeAudio = (base64: string): Uint8Array => {
+export function encodeAudio(bytes: Uint8Array): string {
+  let binary = '';
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+export function decodeAudio(base64: string): Uint8Array {
   const binaryString = atob(base64);
   const len = binaryString.length;
   const bytes = new Uint8Array(len);
@@ -16,7 +25,7 @@ export const decodeAudio = (base64: string): Uint8Array => {
     bytes[i] = binaryString.charCodeAt(i);
   }
   return bytes;
-};
+}
 
 export async function decodeAudioData(
   data: Uint8Array,
@@ -34,63 +43,49 @@ export async function decodeAudioData(
       channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
     }
   }
-
   return buffer;
+}
+
+export function createBlobFromPCM(data: Float32Array): { data: string, mimeType: string } {
+  const l = data.length;
+  const int16 = new Int16Array(l);
+  for (let i = 0; i < l; i++) {
+    int16[i] = data[i] * 32768;
+  }
+  return {
+    data: encodeAudio(new Uint8Array(int16.buffer)),
+    mimeType: 'audio/pcm;rate=16000',
+  };
 }
 
 /* -------------------------------
    CORE AI SERVICES
 -------------------------------- */
 
-// 🔹 Calls Vercel backend for transcription (or implements directly)
-export async function transcribeAudio(
-  base64Audio: string,
-  mimeType: string
-): Promise<string> {
-  const res = await fetch("/api/transcribe", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      audioBase64: base64Audio,
-      mimeType: mimeType,
-    }),
-  });
-
-  if (!res.ok) {
-    throw new Error("Transcription request failed");
-  }
-
-  const data = await res.json();
-  return data.text || "";
-}
-
-// 🔹 Find Nearby Branches using Google Maps Grounding
-export async function findNearbyBranches(latitude: number, longitude: number) {
+/**
+ * Processes a full voice recording for transcription, translation, and refinement.
+ */
+export async function analyzeVoiceRecording(base64Audio: string, mimeType: string): Promise<string> {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: "Find 3 nearest India Post branches or Post Offices to my current location.",
-    config: {
-      tools: [{ googleMaps: {} }],
-      toolConfig: {
-        retrievalConfig: {
-          latLng: { latitude, longitude }
-        }
-      }
-    },
+    model: "gemini-3-flash-preview",
+    contents: [
+      {
+        parts: [
+          { inlineData: { mimeType: mimeType.split(";")[0], data: base64Audio } },
+          { text: `Listen to this audio recording from an India Post citizen. 
+                   1. Transcribe the audio exactly.
+                   2. If the language is not English, translate it to professional English.
+                   3. Refined the text as a formal, official grievance description for the India Post portal.
+                   4. Preserve all tracking IDs or office names.
+                   Output ONLY the final refined English text.` }
+        ],
+      },
+    ],
   });
-
-  const links: string[] = response.candidates?.[0]?.groundingMetadata?.groundingChunks
-    ?.filter(chunk => chunk.maps?.uri)
-    .map(chunk => chunk.maps!.uri!) || [];
-
-  return {
-    text: response.text,
-    links
-  };
+  return response.text?.trim() || "";
 }
 
-// 🔹 Comprehensive Complaint Analysis
 export async function analyzeComplaint(description: string, imageBase64?: string, context?: string, trackingNumber?: string) {
   const ai = getAI();
   const parts: any[] = [{ text: `Analyze this India Post complaint. Citizen context: ${context || 'N/A'}. Tracking Number: ${trackingNumber || 'N/A'}. Description: ${description}` }];
@@ -136,12 +131,10 @@ export async function analyzeComplaint(description: string, imageBase64?: string
   try {
     return JSON.parse(response.text || "{}");
   } catch (e) {
-    console.error("Failed to parse analysis JSON", e);
     return null;
   }
 }
 
-// 🔹 Extract Details from Image (OCR + Logic)
 export async function extractDetailsFromImage(imageBase64: string) {
   const ai = getAI();
   const response = await ai.models.generateContent({
@@ -149,7 +142,7 @@ export async function extractDetailsFromImage(imageBase64: string) {
     contents: {
       parts: [
         { inlineData: { data: imageBase64.split(',')[1], mimeType: "image/jpeg" } },
-        { text: "Extract the India Post Tracking Number (usually 13 chars, starts/ends with letters) and the Post Office name mentioned in this document/receipt." }
+        { text: "Extract Tracking Number and Post Office name." }
       ]
     },
     config: {
@@ -163,7 +156,6 @@ export async function extractDetailsFromImage(imageBase64: string) {
       }
     }
   });
-
   try {
     return JSON.parse(response.text || "{}");
   } catch (e) {
@@ -171,12 +163,11 @@ export async function extractDetailsFromImage(imageBase64: string) {
   }
 }
 
-// 🔹 Translation and Refinement
 export async function translateAndRefine(text: string) {
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Translate the following text to professional English and refine it as an official India Post grievance description. Text: "${text}"`,
+    contents: `Translate to professional English and refine as official India Post grievance: "${text}"`,
     config: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -188,7 +179,6 @@ export async function translateAndRefine(text: string) {
       }
     }
   });
-
   try {
     return JSON.parse(response.text || "{}");
   } catch (e) {
@@ -196,41 +186,21 @@ export async function translateAndRefine(text: string) {
   }
 }
 
-// 🔹 Polish Agent Draft
-export async function polishDraft(text: string) {
-  const ai = getAI();
-  const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: `Polish the following response from a postal officer to a citizen. Make it more professional, empathetic, and clear. Original: "${text}"`,
-  });
-  return response.text;
-}
-
-// 🔹 Chat Assistant with Search Grounding
 export async function getQuickSupport(query: string, history: string) {
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-pro-preview",
-    contents: `User Query: ${query}\nUser Complaint History:\n${history}\nYou are Dak-Mitra, an India Post AI. Help the user. Use search if needed for current rules/rates.`,
-    config: {
-      tools: [{ googleSearch: {} }]
-    }
+    contents: `User Query: ${query}\nHistory:\n${history}\nYou are Dak-Mitra, India Post AI.`,
+    config: { tools: [{ googleSearch: {} }] }
   });
 
   const links: GroundingLink[] = response.candidates?.[0]?.groundingMetadata?.groundingChunks
     ?.filter(chunk => chunk.web)
-    .map(chunk => ({
-      title: chunk.web!.title || "India Post Resource",
-      uri: chunk.web!.uri!
-    })) || [];
+    .map(chunk => ({ title: chunk.web!.title || "India Post Resource", uri: chunk.web!.uri! })) || [];
 
-  return {
-    text: response.text,
-    links
-  };
+  return { text: response.text, links };
 }
 
-// 🔹 Text to Speech
 export async function generateSpeech(text: string): Promise<string | undefined> {
   const ai = getAI();
   const response = await ai.models.generateContent({
@@ -238,13 +208,37 @@ export async function generateSpeech(text: string): Promise<string | undefined> 
     contents: [{ parts: [{ text: `Say clearly: ${text}` }] }],
     config: {
       responseModalities: [Modality.AUDIO],
-      speechConfig: {
-        voiceConfig: {
-          prebuiltVoiceConfig: { voiceName: 'Kore' },
-        },
-      },
+      speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } },
+    },
+  });
+  return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+}
+
+export async function findNearbyBranches(latitude: number, longitude: number) {
+  const ai = getAI();
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: "Find 3 nearest India Post branches or Post Offices to my current location.",
+    config: {
+      tools: [{ googleMaps: {} }],
+      toolConfig: {
+        retrievalConfig: { latLng: { latitude, longitude } }
+      }
     },
   });
 
-  return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+  const links: string[] = response.candidates?.[0]?.groundingMetadata?.groundingChunks
+    ?.filter(chunk => chunk.maps?.uri)
+    .map(chunk => chunk.maps!.uri!) || [];
+
+  return { text: response.text, links };
+}
+
+export async function polishDraft(text: string) {
+  const ai = getAI();
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: `Polish this response from postal officer to citizen: "${text}"`,
+  });
+  return response.text;
 }
