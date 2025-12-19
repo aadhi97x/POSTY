@@ -79,7 +79,6 @@ const SubmitComplaint: React.FC<SubmitProps> = ({ user, onSubmit, existingCompla
       reader.readAsDataURL(blob);
       reader.onloadend = async () => {
         const base64Audio = (reader.result as string).split(',')[1];
-        // Updated to pass a single object argument matching the new service signature
         const result = await analyzeVoiceRecording({ base64Audio, mimeType: blob.type });
         if (result) {
           setDescription(prev => prev + (prev.length > 0 ? '\n' : '') + result);
@@ -124,7 +123,7 @@ const SubmitComplaint: React.FC<SubmitProps> = ({ user, onSubmit, existingCompla
     
     try {
       const context = existingComplaints.slice(0, 3).map(c => c.description).join('\n');
-      // Fixed: Passing 1 object instead of multiple arguments to match refactored signature
+      // Fix: Passing exactly one object argument as required by the interface.
       const analysis = await analyzeComplaint({
         description,
         imageBase64: image || undefined,

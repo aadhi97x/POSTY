@@ -8,16 +8,16 @@ export const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
    AUDIO UTILS
 -------------------------------- */
 
-export function encodeAudio(bytes: Uint8Array): string {
+export const encodeAudio = (bytes: Uint8Array): string => {
   let binary = '';
   const len = bytes.byteLength;
   for (let i = 0; i < len; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
   return btoa(binary);
-}
+};
 
-export function decodeAudio(base64: string): Uint8Array {
+export const decodeAudio = (base64: string): Uint8Array => {
   const binaryString = atob(base64);
   const len = binaryString.length;
   const bytes = new Uint8Array(len);
@@ -25,14 +25,14 @@ export function decodeAudio(base64: string): Uint8Array {
     bytes[i] = binaryString.charCodeAt(i);
   }
   return bytes;
-}
+};
 
-export async function decodeAudioData(
+export const decodeAudioData = async (
   data: Uint8Array,
   ctx: AudioContext,
   sampleRate: number,
   numChannels: number
-): Promise<AudioBuffer> {
+): Promise<AudioBuffer> => {
   const dataInt16 = new Int16Array(data.buffer);
   const frameCount = dataInt16.length / numChannels;
   const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
@@ -44,9 +44,9 @@ export async function decodeAudioData(
     }
   }
   return buffer;
-}
+};
 
-export function createBlobFromPCM(data: Float32Array): { data: string, mimeType: string } {
+export const createBlobFromPCM = (data: Float32Array): { data: string, mimeType: string } => {
   const l = data.length;
   const int16 = new Int16Array(l);
   for (let i = 0; i < l; i++) {
@@ -56,17 +56,13 @@ export function createBlobFromPCM(data: Float32Array): { data: string, mimeType:
     data: encodeAudio(new Uint8Array(int16.buffer)),
     mimeType: 'audio/pcm;rate=16000',
   };
-}
+};
 
 /* -------------------------------
    CORE AI SERVICES
 -------------------------------- */
 
-/**
- * Processes a full voice recording for transcription, translation, and refinement.
- * Updated to take a single object argument to satisfy caller signature expectations.
- */
-export async function analyzeVoiceRecording(params: { base64Audio: string, mimeType: string }): Promise<string> {
+export const analyzeVoiceRecording = async (params: { base64Audio: string, mimeType: string }): Promise<string> => {
   const { base64Audio, mimeType } = params;
   const ai = getAI();
   const response = await ai.models.generateContent({
@@ -86,12 +82,9 @@ export async function analyzeVoiceRecording(params: { base64Audio: string, mimeT
     ],
   });
   return response.text?.trim() || "";
-}
+};
 
-/**
- * Refactored to accept a single object argument to satisfy the '1 argument' fix requirement.
- */
-export async function analyzeComplaint(params: { description: string, imageBase64?: string, context?: string, trackingNumber?: string }) {
+export const analyzeComplaint = async (params: { description: string, imageBase64?: string, context?: string, trackingNumber?: string }) => {
   const { description, imageBase64, context, trackingNumber } = params;
   const ai = getAI();
   const parts: any[] = [{ text: `Analyze this India Post complaint. Context: ${context || 'N/A'}. Tracking: ${trackingNumber || 'N/A'}. Description: ${description}` }];
@@ -139,9 +132,9 @@ export async function analyzeComplaint(params: { description: string, imageBase6
   } catch (e) {
     return null;
   }
-}
+};
 
-export async function extractDetailsFromImage(imageBase64: string) {
+export const extractDetailsFromImage = async (imageBase64: string) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
@@ -167,9 +160,9 @@ export async function extractDetailsFromImage(imageBase64: string) {
   } catch (e) {
     return null;
   }
-}
+};
 
-export async function translateAndRefine(text: string) {
+export const translateAndRefine = async (text: string) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
@@ -190,9 +183,9 @@ export async function translateAndRefine(text: string) {
   } catch (e) {
     return { translated: text, originalLang: "Unknown" };
   }
-}
+};
 
-export async function getQuickSupport(query: string, history: string) {
+export const getQuickSupport = async (query: string, history: string) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-pro-preview",
@@ -205,9 +198,9 @@ export async function getQuickSupport(query: string, history: string) {
     .map(chunk => ({ title: chunk.web!.title || "Resource", uri: chunk.web!.uri! })) || [];
 
   return { text: response.text, links };
-}
+};
 
-export async function generateSpeech(text: string): Promise<string | undefined> {
+export const generateSpeech = async (text: string): Promise<string | undefined> => {
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash-preview-tts",
@@ -218,9 +211,9 @@ export async function generateSpeech(text: string): Promise<string | undefined> 
     },
   });
   return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-}
+};
 
-export async function findNearbyBranches(latitude: number, longitude: number) {
+export const findNearbyBranches = async (latitude: number, longitude: number) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
@@ -238,13 +231,13 @@ export async function findNearbyBranches(latitude: number, longitude: number) {
     .map(chunk => chunk.maps!.uri!) || [];
 
   return { text: response.text, links };
-}
+};
 
-export async function polishDraft(text: string) {
+export const polishDraft = async (text: string) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: `Polish this response: "${text}"`,
   });
   return response.text;
-}
+};
