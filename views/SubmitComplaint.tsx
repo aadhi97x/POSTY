@@ -79,7 +79,7 @@ const SubmitComplaint: React.FC<SubmitProps> = ({ user, onSubmit, existingCompla
       reader.readAsDataURL(blob);
       reader.onloadend = async () => {
         const base64Audio = (reader.result as string).split(',')[1];
-        // Fix: correctly passing 2 arguments to analyzeVoiceRecording to match the service signature
+        // Correctly passing two arguments: base64Audio and mimeType
         const result = await analyzeVoiceRecording(base64Audio, blob.type);
         if (result) {
           setDescription(prev => prev + (prev.length > 0 ? '\n' : '') + result);
@@ -207,7 +207,7 @@ const SubmitComplaint: React.FC<SubmitProps> = ({ user, onSubmit, existingCompla
             </div>
             
             <div className="relative group">
-               <textarea required rows={8} placeholder="Describe your issue... Use our voice memo feature for AI-powered transcription and automatic translation into formal English." className="w-full p-10 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-[2.5rem] outline-none focus:border-black transition-all font-medium text-lg leading-relaxed placeholder:text-slate-300" value={description} onChange={(e) => setDescription(e.target.value)} />
+               <textarea required rows={8} placeholder="Describe your issue... Use our voice recording feature for AI transcription and translation." className="w-full p-10 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-[2.5rem] outline-none focus:border-black transition-all font-medium text-lg leading-relaxed placeholder:text-slate-300" value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
           </div>
 

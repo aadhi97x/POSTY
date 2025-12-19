@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, Bot, Loader2, Mic, ExternalLink, Waves } from 'lucide-react';
+import { Bot, X, Send, Mic, Waves, Loader2, ExternalLink } from 'lucide-react';
 import { getQuickSupport, generateSpeech, decodeAudio, decodeAudioData } from '../services/geminiService';
 import { Complaint, GroundingLink } from '../types';
 
@@ -68,7 +68,7 @@ const ChatAssistant: React.FC<ChatProps> = ({ complaints = [] }) => {
     try {
       const response = await getQuickSupport(userText, userHistory);
       const botMsg = response.text || "I'm sorry, I couldn't process that.";
-      setMessages(prev => [...prev, { role: 'bot', text: botMsg, links: response.links as GroundingLink[] }]);
+      setMessages(prev => [...prev, { role: 'bot', text: botMsg, links: response.links }]);
       speakResponse(botMsg);
     } catch (error) {
       setMessages(prev => [...prev, { role: 'bot', text: "Technical issue. Please try again later." }]);

@@ -74,11 +74,11 @@ export async function analyzeVoiceRecording(base64Audio: string, mimeType: strin
         parts: [
           { inlineData: { mimeType: mimeType.split(";")[0], data: base64Audio } },
           { text: `Analyze this India Post citizen recording:
-                   1. Transcribe the audio.
-                   2. Detect the language. If it is not English, translate it to professional English.
-                   3. Refine the text into a formal, structured grievance description.
-                   4. Preserve any tracking numbers or branch names mentioned.
-                   Output ONLY the refined English text.` }
+                   1. Transcribe the audio precisely.
+                   2. If the language is not English, translate it to professional English.
+                   3. Refine the text as a formal, official grievance description suitable for the India Post portal.
+                   4. Ensure tracking numbers (e.g., EB123456789IN) or office names are preserved.
+                   Output ONLY the final refined English text.` }
         ],
       },
     ],
