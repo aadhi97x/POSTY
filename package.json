@@ -1,4 +1,3 @@
-
 {
   "name": "indiapost-smart-redressal",
   "private": true,
@@ -10,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@vercel/node": "latest"
+    "@vercel/node": "latest",
     "@google/genai": "^1.34.0",
     "lucide-react": "^0.562.0",
     "react": "^19.0.0",

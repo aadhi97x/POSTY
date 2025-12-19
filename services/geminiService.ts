@@ -88,7 +88,11 @@ export async function analyzeVoiceRecording(params: { base64Audio: string, mimeT
   return response.text?.trim() || "";
 }
 
-export async function analyzeComplaint(description: string, imageBase64?: string, context?: string, trackingNumber?: string) {
+/**
+ * Refactored to accept a single object argument to satisfy the '1 argument' fix requirement.
+ */
+export async function analyzeComplaint(params: { description: string, imageBase64?: string, context?: string, trackingNumber?: string }) {
+  const { description, imageBase64, context, trackingNumber } = params;
   const ai = getAI();
   const parts: any[] = [{ text: `Analyze this India Post complaint. Context: ${context || 'N/A'}. Tracking: ${trackingNumber || 'N/A'}. Description: ${description}` }];
   

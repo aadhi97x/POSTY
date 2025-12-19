@@ -124,7 +124,13 @@ const SubmitComplaint: React.FC<SubmitProps> = ({ user, onSubmit, existingCompla
     
     try {
       const context = existingComplaints.slice(0, 3).map(c => c.description).join('\n');
-      const analysis = await analyzeComplaint(description, image || undefined, context, trackingNumber);
+      // Fixed: Passing 1 object instead of multiple arguments to match refactored signature
+      const analysis = await analyzeComplaint({
+        description,
+        imageBase64: image || undefined,
+        context,
+        trackingNumber
+      });
       
       const newComplaint: Complaint = {
         id: `PGC-${Math.floor(Math.random() * 90000) + 10000}`,
