@@ -1,7 +1,8 @@
-// api/transcribe.ts
+
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from "@google/genai";
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -18,7 +19,7 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: "Audio data missing" });
     }
 
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey });
 
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
@@ -39,11 +40,11 @@ export default async function handler(req: any, res: any) {
       ],
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       text: response.text?.trim() || "",
     });
   } catch (error: any) {
     console.error("Transcription error:", error);
-    res.status(500).json({ error: "Transcription failed" });
+    return res.status(500).json({ error: "Transcription failed" });
   }
 }

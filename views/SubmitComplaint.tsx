@@ -79,8 +79,8 @@ const SubmitComplaint: React.FC<SubmitProps> = ({ user, onSubmit, existingCompla
       reader.readAsDataURL(blob);
       reader.onloadend = async () => {
         const base64Audio = (reader.result as string).split(',')[1];
-        // Correctly passing two arguments: base64Audio and mimeType
-        const result = await analyzeVoiceRecording(base64Audio, blob.type);
+        // Updated to pass a single object argument matching the new service signature
+        const result = await analyzeVoiceRecording({ base64Audio, mimeType: blob.type });
         if (result) {
           setDescription(prev => prev + (prev.length > 0 ? '\n' : '') + result);
         } else {

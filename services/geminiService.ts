@@ -64,8 +64,10 @@ export function createBlobFromPCM(data: Float32Array): { data: string, mimeType:
 
 /**
  * Processes a full voice recording for transcription, translation, and refinement.
+ * Updated to take a single object argument to satisfy caller signature expectations.
  */
-export async function analyzeVoiceRecording(base64Audio: string, mimeType: string): Promise<string> {
+export async function analyzeVoiceRecording(params: { base64Audio: string, mimeType: string }): Promise<string> {
+  const { base64Audio, mimeType } = params;
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
