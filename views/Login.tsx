@@ -1,8 +1,8 @@
 
 import React, { useState, useContext } from 'react';
 import { User } from '../types';
-import { LangContext, IndiaPostLogo } from '../App';
-import { Smartphone, Lock, User as UserIcon, Mail, Briefcase, ChevronLeft, ShieldCheck } from 'lucide-react';
+import { LangContext, IndiaPostLogo, StateEmblem } from '../App';
+import { Smartphone, Lock, User as UserIcon, Mail, Briefcase, ChevronLeft, ShieldCheck, Building2 } from 'lucide-react';
 
 interface LoginProps {
   onLogin: (user: User) => void;
@@ -57,58 +57,59 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   const BrandingBox = () => (
-    <div className="flex flex-col items-center mb-10 text-slate-900 dark:text-white">
+    <div className="flex flex-col items-center mb-12 text-heritage-maroon">
+      <StateEmblem className="h-24 mb-6" />
       <IndiaPostLogo className="h-16 mb-2" />
-      <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-400 mt-2">Government of India</p>
+      <p className="text-[11px] font-black uppercase tracking-[0.5em] text-heritage-sandstone mt-4">Sovereign Grievance Protocol</p>
     </div>
   );
 
   if (!role) {
     return (
-      <div className="max-w-xl mx-auto mt-6 p-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[3.5rem] shadow-2xl transition-all animate-in fade-in zoom-in duration-500">
+      <div className="max-w-2xl mx-auto p-16 parchment-card rounded-[4rem] animate-expand">
         <BrandingBox />
         
-        <div className="my-12 flex items-center gap-4 text-center justify-center">
-          <div className="h-px bg-slate-100 dark:bg-slate-800 flex-grow"></div>
-          <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] whitespace-nowrap">{t.login_title}</h2>
-          <div className="h-px bg-slate-100 dark:bg-slate-800 flex-grow"></div>
+        <div className="my-16 flex items-center gap-6 text-center justify-center">
+          <div className="h-px bg-heritage-sandstone/30 flex-grow"></div>
+          <h2 className="text-[12px] font-black text-heritage-sandstone uppercase tracking-[0.4em] whitespace-nowrap">{t.login_title}</h2>
+          <div className="h-px bg-heritage-sandstone/30 flex-grow"></div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           <button 
             onClick={() => { setRole('user'); setStep('phone'); }}
-            className="flex flex-col items-center gap-6 p-10 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-indiapost-red group transition-all rounded-[2.5rem]"
+            className="flex flex-col items-center gap-8 p-12 bg-heritage-sandstone/10 border-2 border-heritage-sandstone/20 hover:border-heritage-red group transition-all rounded-[3rem] shadow-xl hover:-translate-y-2"
           >
-            <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl text-indiapost-red group-hover:bg-indiapost-red group-hover:text-white transition-all shadow-sm">
-              <UserIcon size={32} />
+            <div className="p-8 bg-white/80 rounded-[2rem] text-heritage-red group-hover:bg-heritage-red group-hover:text-heritage-parchment transition-all shadow-lg">
+              <UserIcon size={44} />
             </div>
             <div className="text-center">
-              <p className="font-black text-slate-900 dark:text-white uppercase text-xs tracking-tight">{t.login_citizen}</p>
-              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-2">Public Portal</p>
+              <p className="font-black text-heritage-maroon uppercase text-sm tracking-widest">{t.login_citizen}</p>
+              <p className="text-[10px] text-heritage-sandstone font-black uppercase tracking-[0.3em] mt-3 italic">Public Access</p>
             </div>
           </button>
 
           <button 
             onClick={() => { setRole('staff'); setStep('staff_form'); }}
-            className="flex flex-col items-center gap-6 p-10 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-black dark:hover:border-white group transition-all rounded-[2.5rem]"
+            className="flex flex-col items-center gap-8 p-12 bg-heritage-sandstone/10 border-2 border-heritage-sandstone/20 hover:border-heritage-maroon group transition-all rounded-[3rem] shadow-xl hover:-translate-y-2"
           >
-            <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl text-slate-600 dark:text-slate-400 group-hover:bg-slate-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-all shadow-sm">
-              <Briefcase size={32} />
+            <div className="p-8 bg-white/80 rounded-[2rem] text-heritage-maroon group-hover:bg-heritage-maroon group-hover:text-heritage-parchment transition-all shadow-lg">
+              <Building2 size={44} />
             </div>
             <div className="text-center">
-              <p className="font-black text-slate-900 dark:text-white uppercase text-xs tracking-tight">{t.login_staff}</p>
-              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-2">Admin Panel</p>
+              <p className="font-black text-heritage-maroon uppercase text-sm tracking-widest">{t.login_staff}</p>
+              <p className="text-[10px] text-heritage-sandstone font-black uppercase tracking-[0.3em] mt-3 italic">Official Log</p>
             </div>
           </button>
         </div>
 
-        <div className="mt-16 text-center">
-           <div className="flex items-center justify-center gap-2 text-slate-400 mb-2">
-             <ShieldCheck size={14} />
-             <p className="text-[9px] font-black uppercase tracking-widest">End-to-End Encrypted Portal</p>
+        <div className="mt-20 text-center space-y-4 opacity-60">
+           <div className="flex items-center justify-center gap-3 text-heritage-maroon">
+             <ShieldCheck size={18} />
+             <p className="text-[11px] font-black uppercase tracking-[0.3em]">Encrypted National Terminal</p>
            </div>
-           <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] leading-loose max-w-xs mx-auto">
-             Official Ministry of Communications Infrastructure for AI-Enhanced Grievance Redressal
+           <p className="text-[10px] font-bold text-heritage-sandstone uppercase tracking-[0.2em] leading-relaxed max-w-sm mx-auto">
+             Department of Posts • Ministry of Communications • Government of India
            </p>
         </div>
       </div>
@@ -116,129 +117,129 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-12 p-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[3rem] shadow-2xl transition-all animate-in slide-in-from-right duration-500">
+    <div className="max-w-md mx-auto p-16 parchment-card rounded-[3.5rem] animate-expand">
       <button 
         onClick={() => setRole(null)}
-        className="flex items-center gap-3 text-[10px] font-black text-slate-400 hover:text-indiapost-red mb-12 uppercase tracking-[0.2em] transition-colors group"
+        className="flex items-center gap-3 text-[11px] font-black text-heritage-sandstone hover:text-heritage-red mb-16 uppercase tracking-[0.3em] transition-all group"
       >
-        <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> {t.login_back}
+        <ChevronLeft size={20} className="group-hover:-translate-x-2 transition-transform" /> {t.login_back}
       </button>
 
-      <div className="text-center mb-12">
-        <IndiaPostLogo className="h-12 mx-auto mb-4 text-slate-900 dark:text-white" />
-        <h2 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
+      <div className="text-center mb-16">
+        <IndiaPostLogo className="h-16 mx-auto mb-6 text-heritage-maroon" />
+        <h2 className="text-4xl font-black text-heritage-maroon uppercase tracking-tighter italic">
           {role === 'staff' ? t.login_officer : t.login_verify}
         </h2>
-        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.4em] mt-3">Identity Authentication</p>
+        <p className="text-[11px] text-heritage-sandstone font-black uppercase tracking-[0.4em] mt-4">Security Protocol</p>
       </div>
 
       {role === 'staff' ? (
-        <form onSubmit={handleStaffLogin} className="space-y-8">
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Department ID</label>
+        <form onSubmit={handleStaffLogin} className="space-y-10">
+          <div className="space-y-4">
+            <label className="text-[11px] font-black text-heritage-sandstone uppercase tracking-[0.3em] ml-2">Official Dept ID</label>
             <input
               type="text"
-              placeholder="e.g. DPO-5521"
+              placeholder="e.g. DPO-1854"
               required
-              className="w-full px-6 py-5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:border-indiapost-red transition-all font-bold"
+              className="w-full px-8 py-5 bg-white/50 border-2 border-heritage-sandstone text-heritage-ink rounded-2xl outline-none focus:border-heritage-red transition-all font-bold text-lg"
               value={staffId}
               onChange={(e) => setStaffId(e.target.value)}
             />
           </div>
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Password</label>
+          <div className="space-y-4">
+            <label className="text-[11px] font-black text-heritage-sandstone uppercase tracking-[0.3em] ml-2">Access Key</label>
             <input
               type="password"
               placeholder="••••••••"
               required
-              className="w-full px-6 py-5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:border-indiapost-red transition-all font-bold"
+              className="w-full px-8 py-5 bg-white/50 border-2 border-heritage-sandstone text-heritage-ink rounded-2xl outline-none focus:border-heritage-red transition-all font-bold text-lg"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <button type="submit" className="w-full bg-indiapost-red text-white py-5 rounded-2xl font-black uppercase text-xs tracking-[0.3em] hover:bg-red-800 transition active:scale-95">
+          <button type="submit" className="w-full bg-heritage-maroon text-heritage-parchment py-6 rounded-2xl font-black uppercase text-xs tracking-[0.4em] hover:bg-heritage-red transition-all shadow-2xl active:scale-95">
             {t.login_btn_verify}
           </button>
         </form>
       ) : (
         <>
           {step === 'phone' && (
-            <form onSubmit={handleSendOtp} className="space-y-8">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">{t.login_phone}</label>
+            <form onSubmit={handleSendOtp} className="space-y-10">
+              <div className="space-y-4">
+                <label className="text-[11px] font-black text-heritage-sandstone uppercase tracking-[0.3em] ml-2">{t.login_phone}</label>
                 <div className="relative">
-                  <Smartphone className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                  <Smartphone className="absolute left-8 top-1/2 -translate-y-1/2 text-heritage-sandstone" size={24} />
                   <input
                     type="tel"
-                    placeholder="10 digit mobile number"
+                    placeholder="Enter Mobile Number"
                     required
-                    className="w-full pl-16 pr-6 py-5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:border-indiapost-red transition-all font-bold"
+                    className="w-full pl-20 pr-8 py-5 bg-white/50 border-2 border-heritage-sandstone text-heritage-ink rounded-2xl outline-none focus:border-heritage-red transition-all font-bold text-lg"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                   />
                 </div>
               </div>
-              <button type="submit" className="w-full bg-indiapost-red text-white py-5 rounded-2xl font-black uppercase text-xs tracking-[0.3em] hover:bg-red-800 active:scale-95">
+              <button type="submit" className="w-full bg-heritage-red text-heritage-parchment py-6 rounded-2xl font-black uppercase text-xs tracking-[0.4em] hover:bg-heritage-maroon transition-all shadow-2xl active:scale-95">
                 {t.login_btn_send}
               </button>
             </form>
           )}
 
           {step === 'otp' && (
-            <form onSubmit={handleVerifyOtp} className="space-y-8">
-              <div className="space-y-3 text-center">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t.login_otp}</label>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2 mb-10">Verification Code sent to {phone}</p>
+            <form onSubmit={handleVerifyOtp} className="space-y-10">
+              <div className="space-y-4 text-center">
+                <label className="text-[11px] font-black text-heritage-sandstone uppercase tracking-[0.3em]">{t.login_otp}</label>
+                <p className="text-[10px] text-heritage-sandstone font-bold uppercase tracking-widest mt-2 mb-12 italic">Dispatched to {phone}</p>
                 <div className="relative">
-                  <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                  <Lock className="absolute left-8 top-1/2 -translate-y-1/2 text-heritage-sandstone" size={24} />
                   <input
                     type="text"
                     placeholder="••••••"
                     required
                     maxLength={6}
-                    className="w-full pl-16 pr-6 py-5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:border-indiapost-red transition-all text-center tracking-[0.6em] font-black text-xl"
+                    className="w-full pl-20 pr-8 py-6 bg-white/50 border-2 border-heritage-sandstone text-heritage-ink rounded-2xl outline-none focus:border-heritage-red transition-all text-center tracking-[0.8em] font-black text-2xl shadow-inner"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
                   />
                 </div>
               </div>
-              <button type="submit" className="w-full bg-indiapost-red text-white py-5 rounded-2xl font-black uppercase text-xs tracking-[0.3em] hover:bg-red-800 active:scale-95">
+              <button type="submit" className="w-full bg-heritage-red text-heritage-parchment py-6 rounded-2xl font-black uppercase text-xs tracking-[0.4em] hover:bg-heritage-maroon transition-all shadow-2xl active:scale-95">
                 {t.login_btn_verify}
               </button>
             </form>
           )}
 
           {step === 'profile' && (
-            <form onSubmit={handleCompleteProfile} className="space-y-8">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">{t.login_name}</label>
+            <form onSubmit={handleCompleteProfile} className="space-y-10">
+              <div className="space-y-4">
+                <label className="text-[11px] font-black text-heritage-sandstone uppercase tracking-[0.3em] ml-2">{t.login_name}</label>
                 <div className="relative">
-                  <UserIcon className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                  <UserIcon className="absolute left-8 top-1/2 -translate-y-1/2 text-heritage-sandstone" size={24} />
                   <input
                     type="text"
                     placeholder="Full Legal Name"
                     required
-                    className="w-full pl-16 pr-6 py-5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:border-indiapost-red transition-all font-bold"
+                    className="w-full pl-20 pr-8 py-5 bg-white/50 border-2 border-heritage-sandstone text-heritage-ink rounded-2xl outline-none focus:border-heritage-red transition-all font-bold text-lg"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
                 </div>
               </div>
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">{t.login_email}</label>
+              <div className="space-y-4">
+                <label className="text-[11px] font-black text-heritage-sandstone uppercase tracking-[0.3em] ml-2">{t.login_email}</label>
                 <div className="relative">
-                  <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                  <Mail className="absolute left-8 top-1/2 -translate-y-1/2 text-heritage-sandstone" size={24} />
                   <input
                     type="email"
-                    placeholder="Email address for updates"
+                    placeholder="Email Address"
                     required
-                    className="w-full pl-16 pr-6 py-5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:border-indiapost-red transition-all font-bold"
+                    className="w-full pl-20 pr-8 py-5 bg-white/50 border-2 border-heritage-sandstone text-heritage-ink rounded-2xl outline-none focus:border-heritage-red transition-all font-bold text-lg"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
               </div>
-              <button type="submit" className="w-full bg-indiapost-red text-white py-5 rounded-2xl font-black uppercase text-xs tracking-[0.3em] hover:bg-red-800 active:scale-95">
+              <button type="submit" className="w-full bg-heritage-maroon text-heritage-parchment py-6 rounded-2xl font-black uppercase text-xs tracking-[0.4em] hover:bg-heritage-red transition-all shadow-2xl active:scale-95">
                 {t.login_btn_account}
               </button>
             </form>
@@ -246,8 +247,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         </>
       )}
 
-      <div className="mt-16 pt-10 border-t border-slate-100 dark:border-slate-800 text-center">
-        <p className="text-[8px] font-black text-slate-300 uppercase tracking-[0.4em]">National Grievance Loop • Secure Official Access</p>
+      <div className="mt-20 pt-12 border-t border-heritage-sandstone/20 text-center">
+        <p className="text-[10px] font-black text-heritage-sandstone uppercase tracking-[0.4em] opacity-40 italic">National Postal Neural Network Access</p>
       </div>
     </div>
   );

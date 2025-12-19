@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { 
-  LogOut, Sun, Moon, Search, UserCircle, Bell, Mic, Mail, Loader2, Sparkles
+  LogOut, Sun, Moon, Search, UserCircle, Bell, Mic, Mail, Loader2, Sparkles, Building2, MapPin
 } from 'lucide-react';
 
 import { User, Complaint, Notification, ComplaintStatus } from './types';
@@ -18,8 +19,8 @@ import LiveVoiceAssistant from './views/LiveVoiceAssistant';
 
 export const IndiaPostLogo = ({ className = "h-12" }: { className?: string }) => (
   <svg viewBox="0 0 300 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M20 20L80 50L20 80V20Z" fill="#d12128" />
-    <path d="M40 20L100 50L40 80V20Z" fill="#d12128" opacity="0.6" />
+    <path d="M20 20L80 50L20 80V20Z" fill="#D32F2F" />
+    <path d="M40 20L100 50L40 80V20Z" fill="#7B1F1F" opacity="0.6" />
     <text x="115" y="65" fill="currentColor" className="font-serif italic font-black text-4xl">India Post</text>
   </svg>
 );
@@ -62,7 +63,7 @@ const translations = {
     login_btn_account: "Create Profile",
     login_back: "Back",
     welcome: "Welcome",
-    smart_redressal: "Grievance Redressal System",
+    smart_redressal: "Heritage Redressal System",
     active_cases: "Pending Requests",
     reg: "File a Complaint",
     reg_sub: "Late delivery, missing items, or counter issues.",
@@ -192,127 +193,90 @@ export const LangContext = createContext<{ lang: Language, setLang: (l: Language
 const OfficialHeader = ({ 
   user, 
   onLogout, 
-  isDark, 
-  toggleTheme,
-  notifications,
-  markAllRead,
   onOpenLive
 }: { 
   user: User | null, 
   onLogout: () => void, 
-  isDark: boolean, 
-  toggleTheme: () => void,
-  notifications: Notification[],
-  markAllRead: () => void,
   onOpenLive: () => void
 }) => {
   const { lang, setLang, t } = useContext(LangContext);
   const [showNotifications, setShowNotifications] = useState(false);
-  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
-    <header className="w-full flex flex-col bg-white dark:bg-black transition-colors border-b border-slate-200 dark:border-slate-800 relative z-[100]">
-      <div className="bg-slate-50 dark:bg-slate-900 py-1.5 px-4 md:px-12 border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto flex justify-between items-center text-[10px] md:text-xs">
-          <div className="flex items-center gap-3 font-bold text-slate-700 dark:text-slate-300">
-             <span>भारत सरकार</span>
-             <span className="text-slate-300">|</span>
-             <span>GOVERNMENT OF INDIA</span>
+    <header className="w-full heritage-arch bg-heritage-parchment transition-all relative z-[100] border-b-2 border-heritage-sandstone/50">
+      <div className="bg-heritage-maroon text-heritage-parchment py-1.5 px-4 md:px-12 border-b border-heritage-red/30">
+        <div className="max-w-7xl mx-auto flex justify-between items-center text-[10px] md:text-xs font-bold uppercase tracking-widest">
+          <div className="flex items-center gap-4">
+             <span>भारत सरकार • GOVT OF INDIA</span>
           </div>
-          <div className="flex items-center gap-4 text-slate-600 dark:text-slate-400">
-            <button onClick={onOpenLive} className="flex items-center gap-1.5 hover:text-indiapost-red font-black uppercase tracking-tighter text-indiapost-red">
-              <Mic size={12} className="animate-pulse" /> Live Voice
+          <div className="flex items-center gap-6">
+            <button onClick={onOpenLive} className="flex items-center gap-1.5 hover:text-white transition-colors">
+              <Mic size={12} /> Live Support
             </button>
-            <div className="h-3 w-px bg-slate-200 dark:bg-slate-800"></div>
-            <button onClick={() => setLang(lang === 'en' ? 'hi' : 'en')} className="hover:text-indiapost-red font-bold transition-colors">
+            <button onClick={() => setLang(lang === 'en' ? 'hi' : 'en')} className="hover:text-white transition-colors">
                {lang === 'en' ? 'हिन्दी' : 'English'}
             </button>
-            <div className="h-3 w-px bg-slate-200 dark:bg-slate-800"></div>
-            <button onClick={toggleTheme} className="hover:text-indiapost-red transition-colors">
-               {isDark ? <Sun size={14} /> : <Moon size={14} />}
-            </button>
-            <div className="h-3 w-px bg-slate-200 dark:bg-slate-800"></div>
-            <div className="relative">
-               <button onClick={() => setShowNotifications(!showNotifications)} className="hover:text-indiapost-red transition-colors relative">
+            {user && (
+              <button onClick={() => setShowNotifications(!showNotifications)} className="hover:text-white transition-colors">
                  <Bell size={14} />
-                 {unreadCount > 0 && <span className="absolute -top-1 -right-1 bg-indiapost-red text-white text-[7px] w-3 h-3 rounded-full flex items-center justify-center font-bold animate-pulse">{unreadCount}</span>}
-               </button>
-               {showNotifications && (
-                 <div className="absolute right-0 mt-4 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-4 animate-in fade-in slide-in-from-top-2">
-                   <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
-                     <p className="text-[10px] font-black uppercase tracking-widest text-indiapost-red">Notifications</p>
-                     <button onClick={markAllRead} className="text-[8px] font-bold text-slate-400 uppercase hover:text-indiapost-red">Clear All</button>
-                   </div>
-                   <div className="max-h-64 overflow-y-auto space-y-3 custom-scrollbar">
-                     {notifications.length === 0 ? (
-                       <p className="text-center py-6 text-[10px] text-slate-400 font-bold uppercase">No New Alerts</p>
-                     ) : notifications.map(n => (
-                       <div key={n.id} className={`p-3 rounded-xl border-l-4 ${n.isRead ? 'border-transparent bg-slate-50 dark:bg-slate-800' : 'border-indiapost-red bg-red-50 dark:bg-red-900/10'}`}>
-                         <p className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase">{n.title}</p>
-                         <p className="text-[9px] text-slate-500 font-medium leading-tight mt-1">{n.message}</p>
-                       </div>
-                     ))}
-                   </div>
-                 </div>
-               )}
-            </div>
-            <div className="h-3 w-px bg-slate-200 dark:bg-slate-800"></div>
-            <Link to="/login" className="hover:text-indiapost-red flex items-center gap-1 font-bold transition-colors">
+              </button>
+            )}
+            <Link to="/login" className="hover:text-white flex items-center gap-1.5 transition-colors">
                <UserCircle size={14} /> <span>{user ? user.name : 'Login'}</span>
             </Link>
           </div>
         </div>
       </div>
 
-      <div className="py-8 px-4 md:px-12">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-8">
-          <div className="flex items-center gap-6 shrink-0">
-            <StateEmblem className="h-16 text-slate-900 dark:text-slate-100" />
-            <div className="h-16 w-px bg-slate-200 dark:border-slate-800 hidden md:block"></div>
+      <div className="py-10 px-4 md:px-12">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-10">
+          <div className="flex items-center gap-8 shrink-0">
+            <StateEmblem className="h-20 text-heritage-maroon" />
+            <div className="h-20 w-px bg-heritage-sandstone"></div>
             <div className="flex flex-col">
-              <IndiaPostLogo className="h-10 text-slate-900 dark:text-white" />
-              <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">MINISTRY OF COMMUNICATIONS • GOVT OF INDIA</p>
+              <IndiaPostLogo className="h-12 text-heritage-maroon" />
+              <p className="text-[10px] md:text-xs font-black text-heritage-sandstone uppercase tracking-[0.4em] mt-2">Dignified Service Since 1854</p>
             </div>
           </div>
-          <div className="flex-grow max-w-lg w-full">
-            <div className="relative group">
+          <div className="flex-grow max-w-lg w-full relative">
+            <div className="relative">
               <input 
                 type="text" 
-                placeholder="Search Consignment or Article..." 
-                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 py-3.5 px-6 outline-none focus:border-indiapost-red transition-all font-medium text-slate-600 dark:text-slate-300 rounded-2xl"
+                placeholder="Search Official Records..." 
+                className="w-full bg-white/50 border-2 border-heritage-sandstone py-4 px-8 outline-none focus:border-heritage-red transition-all font-bold text-heritage-ink rounded-full shadow-inner"
               />
-              <Search className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indiapost-red transition-colors" size={20} />
+              <Search className="absolute right-6 top-1/2 -translate-y-1/2 text-heritage-sandstone" size={24} />
             </div>
           </div>
         </div>
       </div>
 
-      <nav className="bg-white/80 dark:bg-black/80 backdrop-blur-md border-t border-slate-100 dark:border-slate-900">
+      <nav className="border-t border-heritage-sandstone/30">
         <div className="max-w-7xl mx-auto px-4 md:px-12 flex flex-col md:flex-row items-center justify-between">
-          <ul className="flex flex-wrap gap-1 text-[11px] font-black uppercase tracking-tight w-full md:w-auto">
+          <ul className="flex flex-wrap gap-2 text-[12px] font-black uppercase tracking-widest w-full md:w-auto">
             {user?.role === 'user' ? (
               <>
-                <li><Link to="/" className="block py-4 px-5 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors border-b-2 border-transparent hover:border-indiapost-red">{t.nav_home}</Link></li>
-                <li><Link to="/submit" className="block py-4 px-5 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors border-b-2 border-transparent hover:border-indiapost-red">{t.nav_submit}</Link></li>
-                <li><Link to="/track" className="block py-4 px-5 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors border-b-2 border-transparent hover:border-indiapost-red">{t.nav_track}</Link></li>
-                <li><Link to="/menu" className="block py-4 px-5 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors border-b-2 border-transparent hover:border-indiapost-red">{t.nav_records}</Link></li>
+                <li><Link to="/" className="block py-5 px-6 hover:text-heritage-red transition-all border-b-4 border-transparent hover:border-heritage-red">{t.nav_home}</Link></li>
+                <li><Link to="/submit" className="block py-5 px-6 hover:text-heritage-red transition-all border-b-4 border-transparent hover:border-heritage-red">{t.nav_submit}</Link></li>
+                <li><Link to="/track" className="block py-5 px-6 hover:text-heritage-red transition-all border-b-4 border-transparent hover:border-heritage-red">{t.nav_track}</Link></li>
+                <li><Link to="/menu" className="block py-5 px-6 hover:text-heritage-red transition-all border-b-4 border-transparent hover:border-heritage-red">{t.nav_records}</Link></li>
               </>
             ) : user ? (
               <>
-                <li><Link to="/" className="block py-4 px-5 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors border-b-2 border-transparent hover:border-indiapost-red">Command Center</Link></li>
+                <li><Link to="/" className="block py-5 px-6 hover:text-heritage-red transition-all border-b-4 border-transparent hover:border-heritage-red">Command Center</Link></li>
               </>
             ) : (
-              <li><Link to="/login" className="block py-4 px-5 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors border-b-2 border-transparent hover:border-indiapost-red">CITIZEN PORTAL</Link></li>
+              <li><Link to="/login" className="block py-5 px-6 hover:text-heritage-red transition-all border-b-4 border-transparent hover:border-heritage-red">CITIZEN PORTAL</Link></li>
             )}
           </ul>
           {user && (
-            <div className="flex items-center gap-4 py-4 md:py-0 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 pl-4">
+            <div className="flex items-center gap-6 py-5 md:py-0">
               <div className="text-right">
-                <p className="text-[11px] font-black text-slate-900 dark:text-white uppercase leading-tight">{user.name}</p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase">{user.role}</p>
+                <p className="text-[12px] font-black text-heritage-maroon uppercase leading-none">{user.name}</p>
+                <p className="text-[9px] font-bold text-heritage-sandstone uppercase tracking-widest mt-1">{user.role}</p>
               </div>
-              <button onClick={onLogout} className="text-slate-400 hover:text-indiapost-red p-2 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all">
-                <LogOut size={16} />
+              <button onClick={onLogout} className="text-heritage-sandstone hover:text-heritage-red p-2.5 bg-white/50 rounded-full transition-all border border-heritage-sandstone/30">
+                <LogOut size={18} />
               </button>
             </div>
           )}
@@ -326,12 +290,10 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [lang, setLang] = useState<Language>('en');
   const [isLiveOpen, setIsLiveOpen] = useState(false);
   const [isLoadingBackend, setIsLoadingBackend] = useState(true);
 
-  // Sync with Backend
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
     if (savedUser) setUser(JSON.parse(savedUser));
@@ -347,7 +309,6 @@ const App: React.FC = () => {
           if (savedComplaints) setComplaints(JSON.parse(savedComplaints));
         }
       } catch (e) {
-        console.error("Backend offline, using local storage");
         const savedComplaints = localStorage.getItem('complaints');
         if (savedComplaints) setComplaints(JSON.parse(savedComplaints));
       } finally {
@@ -370,13 +331,6 @@ const App: React.FC = () => {
   const handleUpdateComplaints = async (updated: Complaint[]) => {
     setComplaints(updated);
     localStorage.setItem('complaints', JSON.stringify(updated));
-    try {
-      await fetch('/api/complaints', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'UPDATE_LIST', complaints: updated })
-      });
-    } catch (e) {}
   };
 
   const handleUpdateFeedback = async (id: string, rating: number, comment: string) => {
@@ -384,55 +338,26 @@ const App: React.FC = () => {
     const updated = complaints.map(c => c.id === id ? { ...c, feedback: { rating, comment, timestamp } } : c);
     setComplaints(updated);
     localStorage.setItem('complaints', JSON.stringify(updated));
-    
-    try {
-      await fetch('/api/complaints', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'UPDATE_FEEDBACK', id, rating, comment, timestamp })
-      });
-    } catch (e) {}
   };
 
   const addComplaint = async (newComplaint: Complaint) => {
     const updated = [newComplaint, ...complaints];
     setComplaints(updated);
     localStorage.setItem('complaints', JSON.stringify(updated));
-
-    try {
-      await fetch('/api/complaints', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'CREATE', complaint: newComplaint })
-      });
-    } catch (e) {}
-  };
-
-  const markNotificationsRead = () => {
-    const updated = notifications.map(n => ({ ...n, isRead: true }));
-    setNotifications(updated);
-  };
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle('dark');
   };
 
   const t = translations[lang];
 
   if (isLoadingBackend) {
     return (
-      <div className="fixed inset-0 bg-white dark:bg-black flex flex-col items-center justify-center gap-8">
-        <div className="relative">
-           <IndiaPostLogo className="h-16 animate-pulse" />
-           <Sparkles className="absolute -top-4 -right-4 text-indiapost-red animate-bounce" />
-        </div>
-        <div className="flex flex-col items-center gap-4">
-           <div className="flex items-center gap-3">
-              <Loader2 className="animate-spin text-indiapost-red" size={24} />
-              <p className="text-xs font-black uppercase tracking-[0.5em] text-slate-400">Neural Sync In Progress</p>
+      <div className="fixed inset-0 bg-heritage-sandstone flex flex-col items-center justify-center gap-12">
+        <div className="jali-overlay"></div>
+        <div className="relative z-10 flex flex-col items-center gap-8">
+           <IndiaPostLogo className="h-24 animate-pulse" />
+           <div className="flex flex-col items-center gap-4">
+              <Loader2 className="animate-spin text-heritage-maroon" size={32} />
+              <p className="text-sm font-black uppercase tracking-[0.5em] text-heritage-maroon">Neural Heritage Sync</p>
            </div>
-           <p className="text-[10px] font-bold text-slate-300 uppercase">Synchronizing Official Grievance Records...</p>
         </div>
       </div>
     );
@@ -441,21 +366,35 @@ const App: React.FC = () => {
   return (
     <LangContext.Provider value={{ lang, setLang, t }}>
       <Router>
-        <div className="min-h-screen flex flex-col bg-white dark:bg-black transition-colors">
+        <div className="min-h-screen flex flex-col relative">
           <OfficialHeader 
-            user={user} onLogout={handleLogout} isDark={isDarkMode} toggleTheme={toggleTheme} 
-            notifications={notifications} markAllRead={markNotificationsRead} onOpenLive={() => setIsLiveOpen(true)}
+            user={user} onLogout={handleLogout} 
+            onOpenLive={() => setIsLiveOpen(true)}
           />
 
-          <main className="flex-grow max-w-7xl mx-auto w-full py-12 px-4">
-            <Routes>
-              <Route path="/login" element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} />
-              <Route path="/" element={user ? (user.role === 'user' ? <Dashboard user={user} complaints={complaints} /> : <AdminTickets complaints={complaints} user={user} onUpdate={handleUpdateComplaints} />) : <Navigate to="/login" />} />
-              <Route path="/submit" element={user?.role === 'user' ? <SubmitComplaint user={user} onSubmit={addComplaint} existingComplaints={complaints} /> : <Navigate to="/login" />} />
-              <Route path="/track" element={user?.role === 'user' ? <TrackStatus complaints={complaints} /> : <Navigate to="/login" />} />
-              <Route path="/menu" element={user?.role === 'user' ? <ComplaintMenu complaints={complaints} onUpdateFeedback={handleUpdateFeedback} /> : <Navigate to="/login" />} />
-            </Routes>
+          <main className="flex-grow max-w-7xl mx-auto w-full py-16 px-6 pillar-shadow bg-heritage-parchment/30 backdrop-blur-sm">
+            <div className="animate-expand">
+              <Routes>
+                <Route path="/login" element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} />
+                <Route path="/" element={user ? (user.role === 'user' ? <Dashboard user={user} complaints={complaints} /> : <AdminTickets complaints={complaints} user={user} onUpdate={handleUpdateComplaints} />) : <Navigate to="/login" />} />
+                <Route path="/submit" element={user?.role === 'user' ? <SubmitComplaint user={user} onSubmit={addComplaint} existingComplaints={complaints} /> : <Navigate to="/login" />} />
+                <Route path="/track" element={user?.role === 'user' ? <TrackStatus complaints={complaints} /> : <Navigate to="/login" />} />
+                <Route path="/menu" element={user?.role === 'user' ? <ComplaintMenu complaints={complaints} onUpdateFeedback={handleUpdateFeedback} /> : <Navigate to="/login" />} />
+              </Routes>
+            </div>
           </main>
+
+          <footer className="py-12 bg-heritage-maroon text-heritage-parchment text-center">
+            <div className="max-w-7xl mx-auto px-6 space-y-4">
+              <p className="text-[12px] font-black uppercase tracking-[0.4em]">{t.footer_text}</p>
+              <p className="text-[10px] opacity-60 font-bold uppercase tracking-widest">{t.footer_subtext}</p>
+              <div className="pt-6 flex justify-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] opacity-40">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Charter</a>
+              </div>
+            </div>
+          </footer>
 
           {user?.role === 'user' && <ChatAssistant complaints={complaints} />}
           {isLiveOpen && <LiveVoiceAssistant onClose={() => setIsLiveOpen(false)} />}

@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { GroundingLink } from "../types";
 
@@ -66,20 +67,18 @@ export const analyzeVoiceRecording = async (params: { base64Audio: string, mimeT
   const { base64Audio, mimeType } = params;
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: [
-      {
-        parts: [
-          { inlineData: { mimeType: mimeType.split(";")[0], data: base64Audio } },
-          { text: `Analyze this India Post citizen recording:
-                   1. Transcribe the audio precisely.
-                   2. If the language is not English, translate it to professional English.
-                   3. Refine the text as a formal, official grievance description suitable for the India Post portal.
-                   4. Ensure tracking numbers (e.g., EB123456789IN) or office names are preserved.
-                   Output ONLY the final refined English text.` }
-        ],
-      },
-    ],
+    model: "gemini-2.5-flash-native-audio-preview-09-2025",
+    contents: {
+      parts: [
+        { inlineData: { mimeType: mimeType.split(";")[0], data: base64Audio } },
+        { text: `Analyze this India Post citizen recording:
+                 1. Transcribe the audio precisely.
+                 2. If the language is not English, translate it to professional English.
+                 3. Refine the text as a formal, official grievance description suitable for the India Post portal.
+                 4. Ensure tracking numbers (e.g., EB123456789IN) or office names are preserved.
+                 Output ONLY the final refined English text.` }
+      ],
+    },
   });
   return response.text?.trim() || "";
 };
@@ -90,9 +89,10 @@ export const analyzeComplaint = async (params: { description: string, imageBase6
   const parts: any[] = [{ text: `Analyze this India Post complaint. Context: ${context || 'N/A'}. Tracking: ${trackingNumber || 'N/A'}. Description: ${description}` }];
   
   if (imageBase64) {
+    const data = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
     parts.push({
       inlineData: {
-        data: imageBase64.split(',')[1],
+        data: data,
         mimeType: "image/jpeg"
       }
     });
@@ -130,18 +130,28 @@ export const analyzeComplaint = async (params: { description: string, imageBase6
   try {
     return JSON.parse(response.text || "{}");
   } catch (e) {
+    console.error("Failed to parse complaint analysis", e);
     return null;
   }
 };
 
 export const extractDetailsFromImage = async (imageBase64: string) => {
   const ai = getAI();
+  const data = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
+  
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: {
       parts: [
-        { inlineData: { data: imageBase64.split(',')[1], mimeType: "image/jpeg" } },
-        { text: "Extract Tracking Number and Post Office name." }
+        { inlineData: { data: data, mimeType: "image/jpeg" } },
+        { text: `Examine this image of an India Post receipt, consignment, or postcard. 
+        Perform deep OCR and entity extraction to identify:
+        1. Tracking Number: Usually starts with two letters (e.g., EF, EB, RT) and ends with 'IN'.
+        2. Sender Details: Name, full Address, and 6-digit PIN code from the 'From' section.
+        3. Receiver Details: Name, full Address, and 6-digit PIN code from the 'To' section.
+        4. Post Office: The originating branch name if visible (often near 'At+PO' or on stamps).
+        
+        Return the result in the specified JSON format. If a field is not found, return an empty string.` }
       ]
     },
     config: {
@@ -150,14 +160,23 @@ export const extractDetailsFromImage = async (imageBase64: string) => {
         type: Type.OBJECT,
         properties: {
           trackingNumber: { type: Type.STRING },
-          postOffice: { type: Type.STRING }
+          postOffice: { type: Type.STRING },
+          senderName: { type: Type.STRING },
+          senderAddress: { type: Type.STRING },
+          senderPin: { type: Type.STRING },
+          receiverName: { type: Type.STRING },
+          receiverAddress: { type: Type.STRING },
+          receiverPin: { type: Type.STRING }
         }
       }
     }
   });
+  
   try {
-    return JSON.parse(response.text || "{}");
+    const text = response.text || "{}";
+    return JSON.parse(text);
   } catch (e) {
+    console.error("Extraction JSON parse error", e);
     return null;
   }
 };
@@ -188,8 +207,8 @@ export const translateAndRefine = async (text: string) => {
 export const getQuickSupport = async (query: string, history: string) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: "gemini-3-pro-preview",
-    contents: `Query: ${query}\nHistory:\n${history}\nYou are Dak-Mitra, India Post AI.`,
+    model: "gemini-3-flash-preview",
+    contents: `Query: ${query}\nHistory:\n${history}\nYou are Dak-Mitra, India Post AI assistant. Be professional.`,
     config: { tools: [{ googleSearch: {} }] }
   });
 
@@ -216,8 +235,8 @@ export const generateSpeech = async (text: string): Promise<string | undefined> 
 export const findNearbyBranches = async (latitude: number, longitude: number) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: "Find 3 nearest India Post branches.",
+    model: "gemini-2.5-flash-native-audio-preview-09-2025", // Using multimodal flash for grounding tasks
+    contents: "Find the 3 nearest India Post branches for the user based on their current location.",
     config: {
       tools: [{ googleMaps: {} }],
       toolConfig: {
@@ -237,7 +256,7 @@ export const polishDraft = async (text: string) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Polish this response: "${text}"`,
+    contents: `Polish this response to a citizen as a professional India Post officer: "${text}"`,
   });
   return response.text;
 };

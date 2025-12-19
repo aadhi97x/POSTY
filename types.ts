@@ -76,6 +76,12 @@ export interface ConsignmentScan {
   event: string;
 }
 
+export interface AddressInfo {
+  name: string;
+  address: string;
+  pinCode: string;
+}
+
 export interface Complaint {
   id: string;
   userId: string;
@@ -94,7 +100,9 @@ export interface Complaint {
   escalationLevel: number; 
   lastActivityAt: string;
   slaPaused: boolean;
-  scans?: ConsignmentScan[]; // Mock tracking history
+  scans?: ConsignmentScan[];
+  sender?: AddressInfo;
+  receiver?: AddressInfo;
 }
 
 export interface User {
