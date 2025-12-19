@@ -12,7 +12,8 @@ import {
   Image as ImageIcon, Download, ChevronRight,
   Filter, Info, ListChecks, Activity, MessageCircle,
   AlertOctagon, History, Shield, Tag, Timer, Users,
-  UserCheck, Layers, FileText
+  UserCheck, Layers, FileText, BarChart3, Fingerprint,
+  TrendingDown, Minus
 } from 'lucide-react';
 
 interface AdminProps {
@@ -89,10 +90,11 @@ const AdminTickets: React.FC<AdminProps> = ({ complaints: initialComplaints, use
   };
 
   const handleExportReport = () => {
-    const headers = ["ID", "Citizen Name", "Tracking Number", "Status", "Category", "Priority Score", "Post Office", "Date Reported", "Description"];
+    const headers = ["ID", "Citizen Name", "Tracking Number", "Status", "Category", "Priority Score", "Sentiment", "Post Office", "Date Reported", "Description"];
     const rows = complaints.map(c => [
       c.id, c.userName, c.trackingNumber || "N/A", c.status,
       c.analysis?.category || "Other", c.analysis?.priorityScore || "0",
+      c.analysis?.sentiment || "Neutral",
       c.postOffice, new Date(c.date).toLocaleDateString(),
       `"${c.description.replace(/"/g, '""')}"`
     ]);
@@ -105,6 +107,21 @@ const AdminTickets: React.FC<AdminProps> = ({ complaints: initialComplaints, use
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const getSentimentStyles = (sentiment: string) => {
+    const s = sentiment?.toLowerCase();
+    if (s === 'negative' || s === 'angry' || s === 'frustrated') 
+      return 'bg-red-50 text-red-600 border-red-100 dark:bg-red-900/10 dark:border-red-900/30';
+    if (s === 'positive') 
+      return 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/10 dark:border-emerald-900/30';
+    return 'bg-blue-50 text-blue-500 border-blue-100 dark:bg-blue-900/10 dark:border-blue-900/30';
+  };
+
+  const getPriorityColor = (score: number) => {
+    if (score >= 80) return 'text-red-600';
+    if (score >= 50) return 'text-amber-600';
+    return 'text-slate-500';
   };
 
   const DashboardView = () => (
@@ -226,37 +243,76 @@ const AdminTickets: React.FC<AdminProps> = ({ complaints: initialComplaints, use
       ) : (
         <>
           {/* 2. THREAD LIST */}
-          <aside className="w-[320px] bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
+          <aside className="w-[360px] bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
             <div className="p-6 border-b border-slate-100 dark:border-slate-900 space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-400">{currentView} Queue</h2>
-                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full text-[9px] font-bold">{filtered.length}</span>
+                <span className="bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full text-[10px] font-black">{filtered.length}</span>
               </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
                 <input 
-                  type="text" placeholder="Quick search..." 
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border-none rounded-xl text-xs outline-none focus:ring-1 focus:ring-slate-200 transition-all font-medium"
+                  type="text" placeholder="Filter grievances..." 
+                  className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border-none rounded-xl text-xs outline-none focus:ring-1 focus:ring-slate-200 transition-all font-medium"
                   value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
-            <div className="flex-grow overflow-y-auto custom-scrollbar p-2 space-y-1">
+            
+            <div className="flex-grow overflow-y-auto custom-scrollbar p-3 space-y-3">
                {filtered.map(ticket => (
                  <div 
                    key={ticket.id}
                    onClick={() => setSelectedId(ticket.id)}
-                   className={`p-4 rounded-xl cursor-pointer transition-all relative ${selectedId === ticket.id ? 'bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800' : 'hover:bg-slate-50/50 dark:hover:bg-slate-900/50'}`}
+                   className={`p-5 rounded-2xl cursor-pointer transition-all relative border flex flex-col gap-3 ${selectedId === ticket.id ? 'bg-[#F0F7FF] dark:bg-blue-900/10 border-blue-200 dark:border-blue-800/50 shadow-sm' : 'bg-white dark:bg-slate-950 border-slate-100 dark:border-slate-900 hover:bg-slate-50 dark:hover:bg-slate-900/40'}`}
                  >
                     {selectedId === ticket.id && <div className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-indiapost-red rounded-r-full" />}
-                    <div className="flex justify-between items-start mb-1.5">
-                      <span className="text-[11px] font-bold text-slate-900 dark:text-white truncate pr-2 uppercase">{ticket.userName}</span>
-                      <span className="text-[8px] font-bold text-slate-400 shrink-0">{new Date(ticket.lastActivityAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
+                    
+                    {/* Top Row: User + Tracking */}
+                    <div className="flex justify-between items-start">
+                      <div className="min-w-0">
+                        <span className="text-[11px] font-black text-slate-900 dark:text-white uppercase truncate block leading-none mb-1">{ticket.userName}</span>
+                        <div className="flex items-center gap-1.5">
+                           <Fingerprint size={10} className="text-slate-300" />
+                           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{ticket.trackingNumber || ticket.id}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end">
+                         <div className={`text-xl font-black ${getPriorityColor(ticket.analysis?.priorityScore)}`}>
+                           {ticket.analysis?.priorityScore || 0}
+                         </div>
+                         <span className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">Priority</span>
+                      </div>
                     </div>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 font-medium">{ticket.description}</p>
-                    <div className="flex items-center gap-2 mt-2">
-                       <span className={`w-1.5 h-1.5 rounded-full ${ticket.analysis?.priorityScore > 75 ? 'bg-red-500 animate-pulse' : 'bg-slate-200'}`} />
-                       <span className="text-[8px] font-bold text-slate-300 uppercase">#{ticket.id}</span>
+
+                    {/* Meta Row: Category & Sentiment */}
+                    <div className="flex flex-wrap gap-2">
+                       <div className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 max-w-[140px] truncate">
+                          <Tag size={10} className="text-slate-400" />
+                          <span className="text-[9px] font-black uppercase text-slate-600 dark:text-slate-400 truncate">{ticket.analysis?.category || "General"}</span>
+                       </div>
+                       <div className={`px-2 py-1 rounded-lg border flex items-center gap-1.5 ${getSentimentStyles(ticket.analysis?.sentiment)}`}>
+                          <Activity size={10} />
+                          <span className="text-[9px] font-black uppercase">{ticket.analysis?.sentiment || "Neutral"}</span>
+                       </div>
+                    </div>
+
+                    {/* Snippet Row */}
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2 font-medium leading-relaxed bg-slate-50/50 dark:bg-black/20 p-2 rounded-lg">
+                      {ticket.description}
+                    </p>
+
+                    <div className="flex justify-between items-center pt-2 mt-1 border-t border-slate-50 dark:border-slate-900">
+                       <div className="flex items-center gap-1 text-slate-400">
+                          <Clock size={10} />
+                          <span className="text-[8px] font-bold uppercase">{new Date(ticket.lastActivityAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
+                       </div>
+                       <div className="flex items-center gap-2">
+                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${ticket.status === 'CLOSED' ? 'bg-green-100 text-green-700' : 'bg-indiapost-red/10 text-indiapost-red'}`}>
+                            {ticket.status}
+                          </span>
+                          <ChevronRight size={12} className={selectedId === ticket.id ? 'text-indiapost-red translate-x-1 transition-transform' : 'text-slate-200'} />
+                       </div>
                     </div>
                  </div>
                ))}
@@ -311,7 +367,7 @@ const AdminTickets: React.FC<AdminProps> = ({ complaints: initialComplaints, use
                             </div>
                             <div className="space-y-1">
                                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Sentiment</p>
-                               <p className={`text-[10px] font-black uppercase ${selectedTicket.analysis?.sentiment === 'Angry' ? 'text-red-500' : 'text-slate-900 dark:text-white'}`}>{selectedTicket.analysis?.sentiment}</p>
+                               <p className={`text-[10px] font-black uppercase ${getPriorityColor(selectedTicket.analysis?.priorityScore)}`}>{selectedTicket.analysis?.sentiment}</p>
                             </div>
                             <div className="space-y-1">
                                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Audit</p>
@@ -395,7 +451,7 @@ const AdminTickets: React.FC<AdminProps> = ({ complaints: initialComplaints, use
           </main>
 
           {/* 4. STRATEGIC CONTEXT */}
-          <aside className="w-[300px] bg-white dark:bg-slate-950 border-l border-slate-200 dark:border-slate-800 flex flex-col shrink-0 overflow-y-auto custom-scrollbar p-8 space-y-10">
+          <aside className="w-[320px] bg-white dark:bg-slate-950 border-l border-slate-200 dark:border-slate-800 flex flex-col shrink-0 overflow-y-auto custom-scrollbar p-8 space-y-10">
             {selectedTicket ? (
               <>
                  <section className="space-y-6">
