@@ -2,7 +2,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { 
-  LogOut, Sun, Moon, Search, UserCircle, Bell, Mic, Mail, Loader2, Sparkles, Building2, MapPin
+  LogOut, Sun, Moon, Search, UserCircle, Bell, Mic, Mail, Loader2, Sparkles, Building2, MapPin, Globe
 } from 'lucide-react';
 
 import { User, Complaint, Notification, ComplaintStatus } from './types';
@@ -192,10 +192,76 @@ const translations = {
     terms: "उपयोग की शर्तें",
     charter: "नागरिक चार्टर",
     branch_dir: "निर्देशिका"
+  },
+  ml: {
+    brand_name: "POSTY",
+    nav_home: "ഹോം",
+    nav_submit: "പരാതി നൽകുക",
+    nav_track: "പരാതി ട്രാക്ക് ചെയ്യുക",
+    nav_records: "എന്റെ പരാതികൾ",
+    welcome: "സ്വാഗതം",
+    smart_redressal: "പരാതി പരിഹാര സംവിധാനം",
+    active_cases: "നിലവിലുള്ള പരാതികൾ",
+    reg: "പുതിയ പരാതി",
+    reg_sub: "വിതരണത്തിലെ താമസം, നഷ്ടപ്പെട്ട വസ്തുക്കൾ എന്നിവ അറിയിക്കുക.",
+    track: "ട്രാക്ക് ചെയ്യുക",
+    track_sub: "പരാതിയുടെ നിലവിലെ സ്ഥിതി പരിശോധിക്കുക.",
+    hub: "എന്റെ ഹിസ്റ്ററി",
+    hub_sub: "നിങ്ങളുടെ മുൻപത്തെ പരാതികൾ കാണുക.",
+    resources: "സഹായ ലിങ്കുകൾ",
+    resources_sub: "പ്രധാന പോസ്റ്റി സേവനങ്ങൾ.",
+    speed: "സ്പീഡ് പോസ്റ്റ്",
+    find: "ബ്രാഞ്ച് കണ്ടെത്തുക",
+    proceed: "തുടരുക",
+    open: "പരിശോധിക്കുക",
+    view: "ലിസ്റ്റ് കാണുക",
+    submit_title: "പുതിയ പരാതി",
+    submit_desc: "പ്രശ്നം വിവരിക്കുക",
+    records_title: "നിങ്ങളുടെ പരാതികൾ",
+    login_citizen: "സിറ്റിസൺ ലോഗിൻ",
+    footer_text: "POSTY - പരാതി പരിഹാര പോർട്ടൽ",
+    footer_subtext: "ഇന്ത്യൻ തപാൽ വകുപ്പിന്റെ ഔദ്യോഗിക വെബ്സൈറ്റ്.",
+    login_phone: "മൊബൈൽ നമ്പർ",
+    login_btn_send: "OTP നേടുക",
+    login_verify: "OTP പരിശോധന",
+    login_btn_verify: "സമർപ്പിക്കുക"
+  },
+  te: {
+    brand_name: "POSTY",
+    nav_home: "హోమ్",
+    nav_submit: "ఫిర్యాదు చేయండి",
+    nav_track: "ట్రాక్ చేయండి",
+    nav_records: "నా ఫిర్యాదులు",
+    welcome: "స్వాగతం",
+    smart_redressal: "ఫిర్యాదుల పరిష్కార వ్యవస్థ",
+    active_cases: "పెండింగ్ అభ్యర్థనలు",
+    reg: "ఫిర్యాదును నమోదు చేయండి",
+    reg_sub: "డెలివరీ ఆలస్యం లేదా వస్తువులు పోవడం వంటి సమస్యలు.",
+    track: "స్టేటస్ చూడండి",
+    track_sub: "మీ ఫిర్యాదు ఏ దశలో ఉందో తెలుసుకోండి.",
+    hub: "నా చరిత్ర",
+    hub_sub: "మీ మునుపటి ఫిర్యాదులను చూడండి.",
+    resources: "ముఖ్యమైన లింకులు",
+    resources_sub: "ముఖ్యమైన పోస్టీ సేవలు.",
+    speed: "స్పీడ్ పోస్ట్",
+    find: "బ్రాంచ్ వెతకండి",
+    proceed: "కొనసాగండి",
+    open: "ఇప్పుడే చూడండి",
+    view: "జాబితా చూడండి",
+    submit_title: "కొత్త ఫిర్యాదు",
+    submit_desc: "సమస్యను వివరించండి",
+    records_title: "మీ ఫిర్యాదులు",
+    login_citizen: "సిటిజన్ లాగిన్",
+    footer_text: "POSTY - ఫిర్యాదుల పరిష్కార పోర్టల్",
+    footer_subtext: "భారత ప్రభుత్వ తపాలా శాఖ అధికారిక వెబ్‌సైట్.",
+    login_phone: "మొబైల్ నంబర్",
+    login_btn_send: "OTP పొందండి",
+    login_verify: "OTP ధృవీకరణ",
+    login_btn_verify: "సమర్పించు"
   }
 };
 
-type Language = 'en' | 'hi';
+type Language = 'en' | 'hi' | 'ml' | 'te';
 interface LangContextType {
   lang: Language;
   setLang: (l: Language) => void;
@@ -220,6 +286,13 @@ const OfficialHeader = ({
   const { lang, setLang, t } = useContext(LangContext);
   const [showNotifications, setShowNotifications] = useState(false);
 
+  const langOptions: { value: Language; label: string }[] = [
+    { value: 'en', label: 'English' },
+    { value: 'hi', label: 'हिन्दी' },
+    { value: 'ml', label: 'മലയാളം' },
+    { value: 'te', label: 'తెలుగు' }
+  ];
+
   return (
     <header className="w-full heritage-arch bg-heritage-parchment transition-all relative z-[100] border-b-2 border-heritage-sandstone/50">
       <div className="bg-heritage-maroon text-heritage-parchment py-1.5 px-4 md:px-12 border-b border-heritage-red/30">
@@ -231,9 +304,18 @@ const OfficialHeader = ({
             <button onClick={onOpenLive} className="flex items-center gap-1.5 hover:text-white transition-colors">
               <Mic size={12} /> Live Support
             </button>
-            <button onClick={() => setLang(lang === 'en' ? 'hi' : 'en')} className="hover:text-white transition-colors">
-               {lang === 'en' ? 'हिन्दी' : 'English'}
-            </button>
+            <div className="flex items-center gap-2 group relative">
+              <Globe size={12} />
+              <select 
+                value={lang} 
+                onChange={(e) => setLang(e.target.value as Language)}
+                className="bg-transparent border-none outline-none text-[10px] md:text-xs font-bold uppercase tracking-widest cursor-pointer hover:text-white transition-colors"
+              >
+                {langOptions.map(opt => (
+                  <option key={opt.value} value={opt.value} className="bg-heritage-maroon text-white">{opt.label}</option>
+                ))}
+              </select>
+            </div>
             {user && (
               <button onClick={() => setShowNotifications(!showNotifications)} className="hover:text-white transition-colors">
                  <Bell size={14} />
