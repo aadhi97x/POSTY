@@ -155,7 +155,7 @@ const translations = {
     track_sub: "अपने अनुरोध की वर्तमान स्थिति देखें।",
     hub: "मेरा इतिहास",
     hub_sub: "अपनी पिछली शिकायतों और उनके उत्तर देखें।",
-    resources: "सहायक लिंक",
+    resources: "सहायక लिंक",
     resources_sub: "POSTY की महत्वपूर्ण सेवाएं आपके हाथ में।",
     speed: "एक्सप्रेस मेल",
     find: "शाखा खोजें",
@@ -460,7 +460,8 @@ const App: React.FC = () => {
             onOpenLive={() => setIsLiveOpen(true)}
           />
 
-          <main className="flex-grow max-w-7xl mx-auto w-full py-16 px-6 pillar-shadow bg-heritage-parchment/30 backdrop-blur-sm">
+          {/* Added mb-32 to provide breathing room before the footer */}
+          <main className="flex-grow max-w-7xl mx-auto w-full py-16 px-6 mb-32 pillar-shadow bg-heritage-parchment/30 backdrop-blur-sm">
             <div className="animate-expand">
               <Routes>
                 <Route path="/login" element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} />

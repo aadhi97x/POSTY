@@ -90,10 +90,11 @@ export const analyzeVoiceRecording = async (params: { base64Audio: string, mimeT
     contents: {
       parts: [
         { inlineData: { mimeType: mimeType.split(";")[0], data: base64Audio } },
-        { text: `Transcribe this POSTY citizen recording. 
-                 If the language is not English, translate it to natural English. 
-                 Keep the output direct and clear. Preserve tracking numbers (e.g. EB123456789IN).
-                 Output ONLY the transcribed/translated text.` }
+        { text: `Transcribe and translate this POSTY citizen recording into clear, professional English. 
+                 If the input is in any other language (Hindi, Malayalam, Telugu, etc.), translate it into natural English.
+                 Polish the text slightly for clarity and grammar while keeping it concise.
+                 Strictly preserve all technical details like tracking numbers (e.g. EB123456789IN).
+                 Output ONLY the final polished English text. Do not include introductory phrases, quotes, or explanations.` }
       ],
     },
   });
@@ -273,7 +274,7 @@ export const polishDraft = async (text: string) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Polish this response to a citizen as a professional POSTY officer: "${text}"`,
+    contents: `Polish this draft reply into a professional, empathetic, and formal response to a citizen as an official India Post (POSTY) officer. Output ONLY the polished response. No preamble. Text: "${text}"`,
   });
-  return response.text;
+  return response.text?.trim() || text;
 };

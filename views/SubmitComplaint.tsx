@@ -138,10 +138,10 @@ const SubmitComplaint: React.FC<SubmitProps> = ({ user, onSubmit, existingCompla
         setExtractSuccess(true);
         setTimeout(() => setExtractSuccess(false), 4000);
       } else {
-        setVoiceError("Neural extraction failed to find details in the image.");
+        setVoiceError("Could not extract details from the image.");
       }
     } catch (e) {
-      setVoiceError("Connection to intelligence server failed.");
+      setVoiceError("Connection failed.");
     }
     setIsExtracting(false);
   };
@@ -199,15 +199,14 @@ const SubmitComplaint: React.FC<SubmitProps> = ({ user, onSubmit, existingCompla
         {(isAnalyzingVoice || isExtracting) && (
           <div className="absolute inset-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md z-50 flex flex-col items-center justify-center p-12 text-center animate-in fade-in duration-300">
             <div className="w-24 h-24 rounded-full border-4 border-heritage-red border-t-transparent animate-spin mb-8" />
-            <h3 className="text-2xl font-black uppercase tracking-tighter text-heritage-maroon">Neural Analysis In Progress</h3>
-            <p className="text-[10px] font-bold text-heritage-sandstone uppercase tracking-[0.4em] mt-4">Consulting National Neural Registry...</p>
+            <h3 className="text-2xl font-black uppercase tracking-tighter text-heritage-maroon">Analysing Data</h3>
           </div>
         )}
 
         <div className="bg-heritage-maroon/5 p-16 border-b border-heritage-sandstone/20 flex flex-col md:flex-row justify-between items-center gap-8">
           <div>
             <h2 className="text-4xl font-black uppercase tracking-tight text-heritage-maroon leading-none italic">Register Grievance</h2>
-            <p className="text-[11px] font-black uppercase tracking-[0.4em] text-heritage-red mt-4">Heritage Support Terminal Active</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.4em] text-heritage-red mt-4">Support Terminal Active</p>
           </div>
           <div className="flex gap-4">
              <div className="text-right hidden md:block">
@@ -241,7 +240,7 @@ const SubmitComplaint: React.FC<SubmitProps> = ({ user, onSubmit, existingCompla
                   className={`flex items-center gap-3 text-[10px] font-black uppercase tracking-widest px-8 py-4 rounded-2xl border-2 transition-all shadow-xl ${extractSuccess ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-heritage-maroon text-heritage-parchment border-heritage-maroon hover:bg-heritage-red'}`}
                 >
                   {isExtracting ? <Loader2 className="animate-spin" size={16} /> : extractSuccess ? <CheckCircle2 size={16} /> : <Zap size={16} />} 
-                  {extractSuccess ? "Dossier Auto-Filled" : "Neural Extract"}
+                  {extractSuccess ? "Details Auto-Filled" : "Auto-fill Details"}
                 </button>
               )}
             </div>
@@ -346,14 +345,14 @@ const SubmitComplaint: React.FC<SubmitProps> = ({ user, onSubmit, existingCompla
 
           <div className="pt-12">
             <button type="submit" disabled={isSubmitting} className="w-full bg-heritage-maroon text-heritage-parchment py-10 rounded-[2.5rem] font-black uppercase text-base tracking-[0.5em] hover:bg-heritage-red transition shadow-2xl flex items-center justify-center gap-6 active:scale-[0.98] disabled:opacity-50">
-              {isSubmitting ? <><Loader2 className="animate-spin" size={24} /> Neural Triage...</> : <><CheckCircle2 size={32} /> Secure Archive & Submit</>}
+              {isSubmitting ? <><Loader2 className="animate-spin" size={24} /> Processing...</> : <><CheckCircle2 size={32} /> Secure Archive & Submit</>}
             </button>
           </div>
         </form>
       </div>
       
       <div className="mt-12 text-center opacity-40">
-         <p className="text-[10px] font-black text-heritage-sandstone uppercase tracking-[0.4em]">Official Redressal Portal • Sovereign India Post Protocol</p>
+         <p className="text-[10px] font-black text-heritage-sandstone uppercase tracking-[0.4em]">Official Redressal Portal • Support Protocol</p>
       </div>
     </div>
   );
