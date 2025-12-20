@@ -17,11 +17,22 @@ import LiveVoiceAssistant from './views/LiveVoiceAssistant';
 
 // --- ROBUST BRAND ASSETS (SVG) ---
 
-export const IndiaPostLogo = ({ className = "h-12" }: { className?: string }) => (
-  <svg viewBox="0 0 300 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+export const PostyLogo = ({ className = "h-12" }: { className?: string }) => (
+  <svg viewBox="0 0 350 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Heritage Triangles */}
     <path d="M20 20L80 50L20 80V20Z" fill="#D32F2F" />
     <path d="M40 20L100 50L40 80V20Z" fill="#7B1F1F" opacity="0.6" />
-    <text x="115" y="65" fill="currentColor" className="font-serif italic font-black text-4xl">India Post</text>
+    
+    {/* Samarkan Branding */}
+    <text 
+      x="110" 
+      y="70" 
+      fill="currentColor" 
+      style={{ fontFamily: "'Samarkan', sans-serif" }} 
+      className="text-7xl font-normal lowercase tracking-tighter"
+    >
+      posty
+    </text>
   </svg>
 );
 
@@ -38,7 +49,7 @@ export const StateEmblem = ({ className = "h-16" }: { className?: string }) => (
 
 const translations = {
   en: {
-    brand_name: "India Post",
+    brand_name: "POSTY",
     nav_home: "Home",
     nav_submit: "Register Complaint",
     nav_track: "Track Complaint",
@@ -48,7 +59,7 @@ const translations = {
     helpline: "Customer Care",
     citizen_portal: "CITIZEN SECTION",
     admin_portal: "STAFF LOGIN",
-    login_title: "India Post Help Portal",
+    login_title: "POSTY Help Portal",
     login_subtitle: "AI-Based Complaint Analysis & Automated Response System",
     login_staff: "Department Staff",
     login_citizen: "Citizen Login",
@@ -61,7 +72,7 @@ const translations = {
     login_btn_send: "Get OTP",
     login_btn_verify: "Submit",
     login_btn_account: "Create Profile",
-    login_back: "Back",
+    login_btn_back: "Back",
     welcome: "Welcome",
     smart_redressal: "Heritage Redressal System",
     active_cases: "Pending Requests",
@@ -72,7 +83,7 @@ const translations = {
     hub: "My History",
     hub_sub: "View your previous complaints and their answers.",
     resources: "Helpful Links",
-    resources_sub: "Important India Post services at your fingertips.",
+    resources_sub: "Important POSTY services at your fingertips.",
     speed: "Express Mail",
     find: "Branch Finder",
     proceed: "Click to proceed",
@@ -102,7 +113,7 @@ const translations = {
     records_empty_sub: "You have not filed any complaints yet.",
     records_total: "Total Records",
     records_locate: "Track",
-    footer_text: "India Post - Grievance Redressal Portal",
+    footer_text: "POSTY - Grievance Redressal Portal",
     footer_subtext: "Official website for handling citizen issues. Ministry of Communications, Government of India.",
     privacy: "Privacy Policy",
     terms: "Terms of Use",
@@ -110,7 +121,7 @@ const translations = {
     branch_dir: "Directory"
   },
   hi: {
-    brand_name: "भारतीय डाक",
+    brand_name: "POSTY",
     nav_home: "मुख्य पृष्ठ",
     nav_submit: "शिकायत दर्ज करें",
     nav_track: "स्थिति जानें",
@@ -120,7 +131,7 @@ const translations = {
     helpline: "कस्टमर केयर",
     citizen_portal: "नागरिक अनुभाग",
     admin_portal: "कर्मचारी लॉगिन",
-    login_title: "भारतीय डाक हेल्प पोर्टल",
+    login_title: "POSTY हेल्प पोर्टल",
     login_subtitle: "एआई-आधारित शिकायत विश्लेषण और स्वचालित प्रतिक्रिया प्रणाली",
     login_staff: "विभाग कर्मचारी",
     login_citizen: "नागरिक लॉगिन",
@@ -133,7 +144,7 @@ const translations = {
     login_btn_send: "ओटीपी प्राप्त करें",
     login_btn_verify: "जमा करें",
     login_btn_account: "प्रोफ़ाइल बनाएं",
-    login_back: "पीछे",
+    login_btn_back: "पीछे",
     welcome: "स्वागत है",
     smart_redressal: "शिकायत निवारण प्रणाली",
     active_cases: "लंबित अनुरोध",
@@ -144,7 +155,7 @@ const translations = {
     hub: "मेरा इतिहास",
     hub_sub: "अपनी पिछली शिकायतों और उनके उत्तर देखें।",
     resources: "सहायक लिंक",
-    resources_sub: "भारतीय डाक की महत्वपूर्ण सेवाएं आपके हाथ में।",
+    resources_sub: "POSTY की महत्वपूर्ण सेवाएं आपके हाथ में।",
     speed: "एक्सप्रेस मेल",
     find: "शाखा खोजें",
     proceed: "आगे बढ़ें",
@@ -174,7 +185,7 @@ const translations = {
     records_empty_sub: "आपने अभी तक कोई शिकायत दर्ज नहीं की है।",
     records_total: "कुल रिकॉर्ड",
     records_locate: "ट्रैक",
-    footer_text: "भारतीय डाक - शिकायत निवारण पोर्टल",
+    footer_text: "POSTY - शिकायत निवारण पोर्टल",
     footer_subtext: "नागरिकों की समस्याओं के समाधान के लिए आधिकारिक वेबसाइट। संचार मंत्रालय, भारत सरकार।",
     privacy: "गोपनीयता नीति",
     terms: "उपयोग की शर्तें",
@@ -234,7 +245,7 @@ const OfficialHeader = ({
             <StateEmblem className="h-20 text-heritage-maroon" />
             <div className="h-20 w-px bg-heritage-sandstone"></div>
             <div className="flex flex-col">
-              <IndiaPostLogo className="h-12 text-heritage-maroon" />
+              <PostyLogo className="h-16 text-heritage-maroon" />
               <p className="text-[10px] md:text-xs font-black text-heritage-sandstone uppercase tracking-[0.4em] mt-2">Dignified Service Since 1854</p>
             </div>
           </div>
@@ -353,7 +364,7 @@ const App: React.FC = () => {
       <div className="fixed inset-0 bg-heritage-sandstone flex flex-col items-center justify-center gap-12">
         <div className="jali-overlay"></div>
         <div className="relative z-10 flex flex-col items-center gap-8">
-           <IndiaPostLogo className="h-24 animate-pulse" />
+           <PostyLogo className="h-24 animate-pulse" />
            <div className="flex flex-col items-center gap-4">
               <Loader2 className="animate-spin text-heritage-maroon" size={32} />
               <p className="text-sm font-black uppercase tracking-[0.5em] text-heritage-maroon">Neural Heritage Sync</p>
@@ -386,7 +397,7 @@ const App: React.FC = () => {
 
           <footer className="py-12 bg-heritage-maroon text-heritage-parchment text-center">
             <div className="max-w-7xl mx-auto px-6 space-y-4">
-              <p className="text-[12px] font-black uppercase tracking-[0.4em]">{t.footer_text}</p>
+              <p className="text-[12px] font-black uppercase tracking-[0.4em] font-brand">{t.footer_text}</p>
               <p className="text-[10px] opacity-60 font-bold uppercase tracking-widest">{t.footer_subtext}</p>
               <div className="pt-6 flex justify-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] opacity-40">
                 <a href="#">Privacy</a>

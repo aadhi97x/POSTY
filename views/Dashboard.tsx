@@ -90,7 +90,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, complaints }) => {
                   <span className="text-[12px] font-black uppercase tracking-[0.4em]">Heritage Logistics Intelligence</span>
                </div>
                <h3 className="text-4xl font-black text-heritage-maroon uppercase tracking-tighter leading-none">Official Branch Locator</h3>
-               <p className="text-base text-heritage-sandstone font-bold uppercase tracking-widest leading-relaxed italic opacity-80">Access the national directory of operational India Post offices via real-time satellite telemetry.</p>
+               <p className="text-base text-heritage-sandstone font-bold uppercase tracking-widest leading-relaxed italic opacity-80">Access the national directory of operational POSTY offices via real-time satellite telemetry.</p>
                <button onClick={handleFindBranches} disabled={isLocating} className="bg-heritage-maroon text-heritage-parchment px-12 py-5 rounded-2xl font-black text-[12px] uppercase tracking-[0.3em] shadow-2xl hover:bg-heritage-red transition-all flex items-center gap-4 active:scale-95">
                   {isLocating ? <Loader2 className="animate-spin" size={20} /> : <MapPin size={20} />} Establish GPS Connection
                </button>

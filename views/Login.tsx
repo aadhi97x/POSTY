@@ -1,7 +1,7 @@
 
 import React, { useState, useContext } from 'react';
 import { User } from '../types';
-import { LangContext, IndiaPostLogo, StateEmblem } from '../App';
+import { LangContext, PostyLogo, StateEmblem } from '../App';
 import { Smartphone, Lock, User as UserIcon, Mail, Briefcase, ChevronLeft, ShieldCheck, Building2 } from 'lucide-react';
 
 interface LoginProps {
@@ -50,7 +50,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         id: staffId,
         phone: 'N/A',
         name: `Officer ${staffId.split('-')[1] || staffId}`,
-        email: `${staffId}@indiapost.gov.in`,
+        email: `${staffId}@posty.gov.in`,
         role: 'agent'
       });
     }
@@ -59,7 +59,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const BrandingBox = () => (
     <div className="flex flex-col items-center mb-12 text-heritage-maroon">
       <StateEmblem className="h-24 mb-6" />
-      <IndiaPostLogo className="h-16 mb-2" />
+      <PostyLogo className="h-16 mb-2" />
       <p className="text-[11px] font-black uppercase tracking-[0.5em] text-heritage-sandstone mt-4">Sovereign Grievance Protocol</p>
     </div>
   );
@@ -126,7 +126,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       </button>
 
       <div className="text-center mb-16">
-        <IndiaPostLogo className="h-16 mx-auto mb-6 text-heritage-maroon" />
+        <PostyLogo className="h-16 mx-auto mb-6 text-heritage-maroon" />
         <h2 className="text-4xl font-black text-heritage-maroon uppercase tracking-tighter italic">
           {role === 'staff' ? t.login_officer : t.login_verify}
         </h2>

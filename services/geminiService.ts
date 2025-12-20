@@ -18,6 +18,25 @@ export const encodeAudio = (bytes: Uint8Array): string => {
   return btoa(binary);
 };
 
+export const encode = (bytes: Uint8Array) => {
+  let binary = '';
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+};
+
+export const decode = (base64: string) => {
+  const binaryString = atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+};
+
 export const decodeAudio = (base64: string): Uint8Array => {
   const binaryString = atob(base64);
   const len = binaryString.length;
@@ -67,11 +86,11 @@ export const analyzeVoiceRecording = async (params: { base64Audio: string, mimeT
   const { base64Audio, mimeType } = params;
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: "gemini-flash-latest",
+    model: "gemini-3-flash-preview",
     contents: {
       parts: [
         { inlineData: { mimeType: mimeType.split(";")[0], data: base64Audio } },
-        { text: `Transcribe this India Post citizen recording. 
+        { text: `Transcribe this POSTY citizen recording. 
                  If the language is not English, translate it to natural English. 
                  Keep the output direct and clear. Preserve tracking numbers (e.g. EB123456789IN).
                  Output ONLY the transcribed/translated text.` }
@@ -84,7 +103,7 @@ export const analyzeVoiceRecording = async (params: { base64Audio: string, mimeT
 export const analyzeComplaint = async (params: { description: string, imageBase64?: string, context?: string, trackingNumber?: string }) => {
   const { description, imageBase64, context, trackingNumber } = params;
   const ai = getAI();
-  const parts: any[] = [{ text: `Analyze this India Post complaint. Context: ${context || 'N/A'}. Tracking: ${trackingNumber || 'N/A'}. Description: ${description}` }];
+  const parts: any[] = [{ text: `Analyze this POSTY complaint. Context: ${context || 'N/A'}. Tracking: ${trackingNumber || 'N/A'}. Description: ${description}` }];
   
   if (imageBase64) {
     const data = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
@@ -142,7 +161,7 @@ export const extractDetailsFromImage = async (imageBase64: string) => {
     contents: {
       parts: [
         { inlineData: { data: data, mimeType: "image/jpeg" } },
-        { text: `Examine this image of an India Post receipt, consignment, or postcard. 
+        { text: `Examine this image of a POSTY receipt, consignment, or postcard. 
         Perform deep OCR and entity extraction to identify:
         1. Tracking Number: Usually starts with two letters (e.g., EF, EB, RT) and ends with 'IN'.
         2. Sender Details: Name, full Address, and 6-digit PIN code from the 'From' section.
@@ -183,7 +202,7 @@ export const translateAndRefine = async (text: string) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Translate and refine as official India Post grievance: "${text}"`,
+    contents: `Translate and refine as official POSTY grievance: "${text}"`,
     config: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -206,7 +225,7 @@ export const getQuickSupport = async (query: string, history: string) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Query: ${query}\nHistory:\n${history}\nYou are Dak-Mitra, India Post AI assistant. Be professional.`,
+    contents: `Query: ${query}\nHistory:\n${history}\nYou are Dak-Mitra, POSTY AI assistant. Be professional.`,
     config: { tools: [{ googleSearch: {} }] }
   });
 
@@ -233,8 +252,8 @@ export const generateSpeech = async (text: string): Promise<string | undefined> 
 export const findNearbyBranches = async (latitude: number, longitude: number) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: "gemini-flash-latest",
-    contents: "Find the 3 nearest India Post branches for the user based on their current location.",
+    model: "gemini-3-flash-preview",
+    contents: "Find the 3 nearest POSTY branches for the user based on their current location.",
     config: {
       tools: [{ googleMaps: {} }],
       toolConfig: {
@@ -254,7 +273,7 @@ export const polishDraft = async (text: string) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Polish this response to a citizen as a professional India Post officer: "${text}"`,
+    contents: `Polish this response to a citizen as a professional POSTY officer: "${text}"`,
   });
   return response.text;
 };
