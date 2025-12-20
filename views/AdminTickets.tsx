@@ -13,7 +13,7 @@ import {
   Filter, Info, ListChecks, Activity, MessageCircle,
   AlertOctagon, History, Shield, Tag, Timer, Users,
   UserCheck, Layers, FileText, BarChart3, Fingerprint,
-  TrendingDown, Minus, Building2
+  TrendingDown, Minus, Building2, MoreHorizontal, MapPin
 } from 'lucide-react';
 
 interface AdminProps {
@@ -90,7 +90,7 @@ const AdminTickets: React.FC<AdminProps> = ({ complaints: initialComplaints, use
   };
 
   const handleExportReport = () => {
-    const headers = ["ID", "Citizen Name", "Tracking Number", "Status", "Category", "Priority Score", "Sentiment", "Post Office", "Date Reported", "Description"];
+    const headers = ["ID", "Citizen Name", "Tracking Number", "Status", "Category", "Priority", "Sentiment", "Post Office", "Date Reported", "Description"];
     const rows = complaints.map(c => [
       c.id, c.userName, c.trackingNumber || "N/A", c.status,
       c.analysis?.category || "Other", c.analysis?.priorityScore || "0",
@@ -111,11 +111,24 @@ const AdminTickets: React.FC<AdminProps> = ({ complaints: initialComplaints, use
 
   const getSentimentStyles = (sentiment: string) => {
     const s = sentiment?.toLowerCase();
-    if (s === 'negative' || s === 'angry' || s === 'frustrated') 
-      return 'bg-red-50 text-heritage-red border-heritage-red/20';
+    if (s === 'negative' || s === 'angry' || s === 'frustrated' || s === 'desperate') 
+      return 'bg-red-50 text-heritage-red border-red-100';
     if (s === 'positive') 
-      return 'bg-emerald-50 text-emerald-600 border-emerald-600/20';
-    return 'bg-heritage-parchment text-heritage-sandstone border-heritage-sandstone/20';
+      return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+    return 'bg-slate-50 text-slate-500 border-slate-100';
+  };
+
+  const getContextSuggestions = (ticket: Complaint) => {
+    const cat = ticket.analysis?.category || 'General';
+    const base = [
+      "We are investigating the delay at the processing hub.",
+      "Please provide the original booking receipt for verification.",
+      "The item is currently being redirected to the correct destination."
+    ];
+    
+    if (cat.includes('Delay')) return ["I have expedited this to the NSH manager.", "Your parcel is expected to reach by tomorrow evening.", ...base];
+    if (cat.includes('Lost')) return ["We are checking the CCTV logs at the last known node.", "Please file a formal claim for indemnity.", ...base];
+    return base;
   };
 
   const DashboardView = () => (
@@ -206,14 +219,14 @@ const AdminTickets: React.FC<AdminProps> = ({ complaints: initialComplaints, use
   );
 
   return (
-    <div className="flex h-screen -m-16 bg-heritage-parchment/30 pillar-shadow overflow-hidden">
+    <div className="flex h-screen -m-16 bg-white pillar-shadow overflow-hidden">
       
       {/* 1. PRIMARY SIDEBAR */}
-      <aside className="w-20 bg-heritage-parchment border-r border-heritage-sandstone/30 flex flex-col items-center py-10 shrink-0">
-        <div className="w-12 h-12 bg-heritage-maroon rounded-2xl flex items-center justify-center text-heritage-parchment mb-12 shadow-2xl">
-          <Building2 size={24} />
+      <aside className="w-16 bg-heritage-parchment border-r border-heritage-sandstone/30 flex flex-col items-center py-8 shrink-0 shadow-sm z-20">
+        <div className="w-10 h-10 bg-heritage-maroon rounded-xl flex items-center justify-center text-heritage-parchment mb-10 shadow-lg">
+          <Building2 size={20} />
         </div>
-        <nav className="flex-grow space-y-8">
+        <nav className="flex-grow space-y-6">
           {[
             { id: 'dashboard', icon: LayoutGrid, label: 'Control' },
             { id: 'inbox', icon: Inbox, label: 'Grievance' },
@@ -223,14 +236,13 @@ const AdminTickets: React.FC<AdminProps> = ({ complaints: initialComplaints, use
             <button 
               key={item.id}
               onClick={() => setCurrentView(item.id as ViewFilter)}
-              className={`p-4 rounded-2xl transition-all ${currentView === item.id ? 'bg-heritage-maroon text-heritage-parchment shadow-2xl scale-110' : 'text-heritage-sandstone hover:text-heritage-red'}`}
-              title={item.label}
+              className={`p-3 rounded-xl transition-all relative group ${currentView === item.id ? 'bg-heritage-maroon text-heritage-parchment shadow-md' : 'text-heritage-sandstone hover:text-heritage-red'}`}
             >
-              <item.icon size={22} />
+              <item.icon size={20} />
             </button>
           ))}
         </nav>
-        <button className="p-4 text-heritage-sandstone hover:text-heritage-maroon"><Settings size={22} /></button>
+        <button className="p-3 text-heritage-sandstone hover:text-heritage-maroon transition-colors"><Settings size={20} /></button>
       </aside>
 
       {currentView === 'dashboard' ? (
@@ -239,158 +251,136 @@ const AdminTickets: React.FC<AdminProps> = ({ complaints: initialComplaints, use
         </main>
       ) : (
         <>
-          {/* 2. THREAD LIST */}
-          <aside className="w-[380px] bg-heritage-parchment border-r border-heritage-sandstone/30 flex flex-col shrink-0">
-            <div className="p-10 border-b border-heritage-sandstone/20 space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-[12px] font-black uppercase tracking-[0.4em] text-heritage-maroon">{currentView} List</h2>
-                <span className="bg-heritage-maroon text-heritage-parchment px-3 py-1 rounded-full text-[10px] font-black">{filtered.length}</span>
+          {/* 2. REFINED TICKET LIST */}
+          <aside className="w-[320px] bg-white border-r border-slate-100 flex flex-col shrink-0 z-10">
+            <div className="p-6 border-b border-slate-100 bg-slate-50/30">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">{currentView} Queue</h2>
+                <div className="px-2 py-0.5 bg-slate-200 text-slate-600 rounded-md text-[9px] font-black">{filtered.length}</div>
               </div>
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-heritage-sandstone" size={16} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={12} />
                 <input 
-                  type="text" placeholder="Filter Official Records..." 
-                  className="w-full pl-12 pr-6 py-4 bg-white/50 border-2 border-heritage-sandstone rounded-2xl text-xs outline-none focus:border-heritage-red transition-all font-bold"
+                  type="text" placeholder="Quick search..." 
+                  className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-[11px] outline-none focus:border-heritage-red transition-all font-bold"
                   value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
             
-            <div className="flex-grow overflow-y-auto custom-scrollbar p-4 space-y-4">
+            <div className="flex-grow overflow-y-auto custom-scrollbar p-3 space-y-2 bg-slate-50/20">
                {filtered.map(ticket => (
                  <div 
                    key={ticket.id}
                    onClick={() => setSelectedId(ticket.id)}
-                   className={`p-6 rounded-[2.5rem] cursor-pointer transition-all relative border flex flex-col gap-4 ${selectedId === ticket.id ? 'bg-white shadow-2xl border-heritage-red/30' : 'bg-white/40 border-transparent hover:bg-white/80'}`}
+                   className={`p-4 rounded-2xl cursor-pointer transition-all border flex flex-col gap-2 relative ${selectedId === ticket.id ? 'bg-white shadow-md border-heritage-red/30' : 'bg-transparent border-transparent hover:bg-white hover:border-slate-200'}`}
                  >
-                    {selectedId === ticket.id && <div className="absolute left-0 top-1/4 bottom-1/4 w-1.5 bg-heritage-red rounded-r-full" />}
-                    
                     <div className="flex justify-between items-start">
-                      <div className="min-w-0">
-                        <span className="text-[13px] font-black text-heritage-maroon uppercase truncate block leading-none mb-1 tracking-tight">{ticket.userName}</span>
-                        <span className="text-[10px] font-bold text-heritage-sandstone uppercase tracking-widest">#{ticket.id}</span>
-                      </div>
-                      <div className="flex flex-col items-end">
-                         <div className="text-2xl font-black text-heritage-red leading-none">
-                           {ticket.analysis?.priorityScore || 0}
+                      <div className="flex items-center gap-2">
+                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs ${selectedId === ticket.id ? 'bg-heritage-maroon text-white' : 'bg-slate-100 text-slate-400'}`}>
+                           {ticket.userName.charAt(0)}
                          </div>
-                         <span className="text-[8px] font-black text-heritage-sandstone uppercase tracking-widest">Weight</span>
+                         <div className="min-w-0">
+                           <span className="text-[11px] font-black text-heritage-maroon uppercase truncate block leading-none">{ticket.userName}</span>
+                           <span className="text-[8px] font-bold text-slate-400 uppercase mt-1 block">#{ticket.id}</span>
+                         </div>
+                      </div>
+                      <div className="text-right">
+                         <div className="text-sm font-black text-heritage-red leading-none">{ticket.analysis?.priorityScore || 0}</div>
+                         <span className="text-[6px] font-black text-slate-400 uppercase tracking-widest block mt-0.5">Priority</span>
                       </div>
                     </div>
-
-                    <div className="flex flex-wrap gap-2">
-                       <div className="bg-heritage-sandstone/10 px-3 py-1 rounded-lg border border-heritage-sandstone/20 flex items-center gap-2 max-w-[160px] truncate">
-                          <Tag size={12} className="text-heritage-sandstone" />
-                          <span className="text-[10px] font-black uppercase text-heritage-maroon truncate tracking-tight">{ticket.analysis?.category || "General"}</span>
-                       </div>
-                       <div className={`px-3 py-1 rounded-lg border flex items-center gap-2 ${getSentimentStyles(ticket.analysis?.sentiment)}`}>
-                          <Activity size={12} />
-                          <span className="text-[10px] font-black uppercase tracking-tight">{ticket.analysis?.sentiment || "Neutral"}</span>
-                       </div>
-                    </div>
-
-                    <p className="text-[11px] text-heritage-sandstone font-bold italic line-clamp-2 leading-relaxed bg-heritage-parchment/50 p-4 rounded-2xl">
-                      {ticket.description}
-                    </p>
-
-                    <div className="flex justify-between items-center pt-3 border-t border-heritage-sandstone/10">
-                       <div className="flex items-center gap-2 text-heritage-sandstone">
-                          <Clock size={12} />
-                          <span className="text-[10px] font-black uppercase tracking-widest">{new Date(ticket.lastActivityAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
-                       </div>
-                       <ChevronRight size={16} className={selectedId === ticket.id ? 'text-heritage-red translate-x-2 transition-transform' : 'text-heritage-sandstone/30'} />
-                    </div>
+                    <p className="text-[10px] text-slate-500 font-medium line-clamp-1 leading-normal px-0.5 italic">{ticket.description}</p>
                  </div>
                ))}
             </div>
           </aside>
 
-          {/* 3. WORKSPACE */}
-          <main className="flex-grow flex flex-col min-w-0 bg-heritage-parchment/20 pillar-shadow">
+          {/* 3. CLEANER WORKSPACE */}
+          <main className="flex-grow flex flex-col min-w-0 bg-white">
             {selectedTicket ? (
               <>
-                <header className="px-12 py-8 border-b border-heritage-sandstone/30 flex items-center justify-between shrink-0 bg-heritage-parchment/80 backdrop-blur-md sticky top-0 z-10">
-                   <div className="flex items-center gap-6">
-                      <div className="w-14 h-14 rounded-2xl bg-heritage-maroon text-heritage-parchment flex items-center justify-center font-black text-lg shadow-xl">
+                <header className="px-6 py-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white z-10">
+                   <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-heritage-maroon text-heritage-parchment flex items-center justify-center font-black text-sm">
                         {selectedTicket.userName.charAt(0)}
                       </div>
                       <div>
-                        <h2 className="text-sm font-black uppercase text-heritage-maroon tracking-widest">
-                          {selectedTicket.userName} <span className="text-heritage-sandstone mx-3">|</span> <span className="text-heritage-red">#{selectedTicket.id}</span>
-                        </h2>
-                        <div className="flex items-center gap-3 mt-1.5">
-                          <span className="text-[10px] font-black text-heritage-sandstone uppercase tracking-[0.3em] bg-white/50 px-2 py-1 rounded border border-heritage-sandstone/30">{selectedTicket.analysis?.category}</span>
-                          <span className="text-[10px] font-black text-emerald-700 uppercase flex items-center gap-1.5 tracking-widest"><Shield size={12} /> Identity Authenticated</span>
+                        <div className="flex items-center gap-2">
+                           <h2 className="text-[12px] font-black uppercase text-heritage-maroon">{selectedTicket.userName}</h2>
+                           <span className="text-[8px] font-black text-heritage-red bg-red-50 px-1.5 py-0.5 rounded border border-red-100 uppercase">#{selectedTicket.id}</span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1"><MapPin size={8} /> {selectedTicket.postOffice}</span>
                         </div>
                       </div>
                    </div>
-                   <div className="flex items-center gap-4">
-                      <button className="p-3 text-heritage-sandstone hover:text-heritage-maroon rounded-full bg-white/50 border border-heritage-sandstone/20"><History size={20} /></button>
-                      <button onClick={() => handleAction(ComplaintStatus.CLOSED, "Grievance marked as resolved by officer.")} className="px-10 py-4 bg-heritage-maroon text-heritage-parchment rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] shadow-2xl hover:bg-heritage-red transition-all flex items-center gap-3">
-                        <CheckCircle size={18} /> Seal Case
+                   <div className="flex items-center gap-2">
+                      <button onClick={() => handleAction(ComplaintStatus.CLOSED, "Grievance marked as resolved by officer.")} className="px-4 py-2 bg-heritage-maroon text-heritage-parchment rounded-xl text-[9px] font-black uppercase tracking-widest shadow-md hover:bg-heritage-red transition-all flex items-center gap-2">
+                        <CheckCircle size={12} /> Resolve
                       </button>
                    </div>
                 </header>
 
-                <div className="flex-grow overflow-y-auto custom-scrollbar px-12 py-12 space-y-12">
-                   <div className="max-w-4xl mx-auto space-y-12 animate-expand">
-                      {/* INTEGRATED AI BRIEFING */}
-                      <div className="parchment-card rounded-[3.5rem] p-12 shadow-2xl relative border-2 border-heritage-sandstone/30">
-                         <div className="flex items-center gap-3 text-heritage-red mb-8">
-                            <Sparkles size={20} />
-                            <span className="text-[11px] font-black uppercase tracking-[0.5em]">Neural Heritage Briefing</span>
+                <div className="flex-grow overflow-y-auto custom-scrollbar px-6 py-6 space-y-6 bg-slate-50/30">
+                   <div className="max-w-3xl mx-auto space-y-6">
+                      
+                      {/* COMPACT AI STRIP */}
+                      <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center justify-between gap-6">
+                         <div className="flex-grow min-w-0">
+                            <div className="flex items-center gap-1.5 text-heritage-red mb-1">
+                               <Sparkles size={10} />
+                               <span className="text-[8px] font-black uppercase tracking-[0.2em]">AI Intelligence</span>
+                            </div>
+                            <p className="text-[12px] font-bold italic text-heritage-maroon truncate leading-none">"{selectedTicket.analysis?.summary}"</p>
                          </div>
-                         <h3 className="text-3xl font-black italic text-heritage-maroon mb-10 leading-[1.1] tracking-tighter">"{selectedTicket.analysis?.summary}"</h3>
-                         <div className="grid grid-cols-3 gap-10 border-t border-heritage-sandstone/20 pt-10">
-                            <div className="space-y-4">
-                               <p className="text-[10px] font-black text-heritage-sandstone uppercase tracking-widest">Institutional Weight</p>
-                               <div className="flex items-center gap-4">
-                                  <div className="flex-grow h-2 bg-heritage-sandstone/10 rounded-full">
-                                     <div className="h-full bg-heritage-red rounded-full shadow-[0_0_10px_rgba(211,47,47,0.4)]" style={{ width: `${selectedTicket.analysis?.priorityScore}%` }} />
-                                  </div>
-                                  <span className="text-[12px] font-black text-heritage-maroon">{selectedTicket.analysis?.priorityScore}%</span>
-                               </div>
+                         <div className="flex items-center gap-4 shrink-0 border-l border-slate-100 pl-4">
+                            <div className="text-center">
+                               <p className="text-[7px] font-black text-slate-400 uppercase mb-0.5">Priority</p>
+                               <p className="text-xs font-black text-heritage-red">{selectedTicket.analysis?.priorityScore}%</p>
                             </div>
-                            <div className="space-y-4">
-                               <p className="text-[10px] font-black text-heritage-sandstone uppercase tracking-widest">Sentiment Index</p>
-                               <p className="text-[12px] font-black uppercase text-heritage-red tracking-widest">{selectedTicket.analysis?.sentiment}</p>
-                            </div>
-                            <div className="space-y-4">
-                               <p className="text-[10px] font-black text-heritage-sandstone uppercase tracking-widest">Risk Audit</p>
-                               <p className="text-[12px] font-black text-heritage-maroon uppercase tracking-widest">{selectedTicket.analysis?.intelligenceBriefing?.riskAssessment || 'Normal'}</p>
+                            <div className="text-center">
+                               <p className="text-[7px] font-black text-slate-400 uppercase mb-0.5">Sentiment</p>
+                               <p className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border ${getSentimentStyles(selectedTicket.analysis?.sentiment)}`}>
+                                 {selectedTicket.analysis?.sentiment}
+                               </p>
                             </div>
                          </div>
                       </div>
 
-                      {/* MESSAGE THREAD */}
-                      <div className="space-y-10">
-                         <div className="flex gap-8">
-                            <div className="w-16 h-16 bg-white border border-heritage-sandstone/30 rounded-2xl shrink-0 flex items-center justify-center font-black text-heritage-sandstone text-xl shadow-lg">
+                      <div className="space-y-6">
+                         <div className="flex gap-4 items-start">
+                            <div className="w-10 h-10 bg-white border border-slate-100 rounded-xl shrink-0 flex items-center justify-center font-black text-slate-300 text-sm shadow-sm">
                               {selectedTicket.userName.charAt(0)}
                             </div>
-                            <div className="flex-grow space-y-6">
-                               <div className="parchment-card p-10 rounded-[3rem] rounded-tl-none shadow-xl text-base leading-relaxed text-heritage-ink font-bold italic">
+                            <div className="flex-grow space-y-2">
+                               <div className="bg-heritage-parchment/60 p-5 rounded-2xl rounded-tl-none shadow-sm border border-heritage-sandstone/10 text-[13px] leading-relaxed text-heritage-ink font-bold italic">
                                   {selectedTicket.description}
                                 </div>
                                {selectedTicket.imageUrl && (
-                                 <img src={selectedTicket.imageUrl} className="max-w-md rounded-[2rem] shadow-2xl border-4 border-heritage-parchment" alt="evidence" />
+                                 <div className="relative inline-block mt-2">
+                                    <img src={selectedTicket.imageUrl} className="max-w-[240px] rounded-xl shadow-lg border-2 border-white" alt="evidence" />
+                                 </div>
                                )}
                             </div>
                          </div>
 
                          {selectedTicket.updates.map((u, i) => (
-                            <div key={i} className={`flex gap-8 ${u.isInternal ? 'pl-20' : ''}`}>
+                            <div key={i} className={`flex gap-4 items-start ${u.isInternal ? 'pl-10' : ''}`}>
                                {!u.isInternal && (
-                                 <div className="w-16 h-16 bg-heritage-maroon rounded-2xl shrink-0 flex items-center justify-center font-black text-heritage-parchment text-xl shadow-xl">
+                                 <div className="w-10 h-10 bg-heritage-maroon rounded-xl shrink-0 flex items-center justify-center font-black text-heritage-parchment text-sm">
                                    {u.author.charAt(0)}
                                  </div>
                                )}
-                               <div className={`p-10 rounded-[3rem] flex-grow shadow-lg text-sm ${u.isInternal ? 'bg-heritage-maroon/5 border border-heritage-maroon/20 text-heritage-maroon rounded-tr-none' : 'parchment-card rounded-tl-none text-heritage-ink'}`}>
-                                  <div className="flex justify-between items-center mb-6">
-                                     <span className="text-[11px] font-black uppercase tracking-[0.3em] opacity-50">{u.isInternal ? 'Internal Audit Note' : u.author}</span>
-                                     <span className="text-[11px] font-bold opacity-30">{new Date(u.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                               <div className={`p-5 rounded-2xl flex-grow shadow-sm text-[13px] border ${u.isInternal ? 'bg-slate-100/50 border-slate-200 text-slate-600 rounded-tr-none' : 'bg-white border-slate-100 rounded-tl-none text-heritage-ink'}`}>
+                                  <div className="flex justify-between items-center mb-2">
+                                     <span className="text-[8px] font-black uppercase tracking-widest opacity-50 flex items-center gap-1.5">
+                                        {u.isInternal ? <Shield size={8} /> : <UserCheck size={8} />}
+                                        {u.isInternal ? 'Internal Audit' : u.author}
+                                     </span>
+                                     <span className="text-[8px] font-bold opacity-30">{new Date(u.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                   </div>
-                                  <p className="font-bold leading-relaxed text-lg">{u.message}</p>
+                                  <p className="font-bold leading-normal">{u.message}</p>
                                </div>
                             </div>
                          ))}
@@ -398,29 +388,40 @@ const AdminTickets: React.FC<AdminProps> = ({ complaints: initialComplaints, use
                    </div>
                 </div>
 
-                <footer className="p-12 border-t border-heritage-sandstone/30 bg-heritage-parchment/50 shrink-0">
-                   <div className="max-w-4xl mx-auto space-y-8">
-                      <div className="flex gap-10 px-6">
-                         <button className="text-[11px] font-black uppercase tracking-[0.4em] text-heritage-red border-b-2 border-heritage-red pb-2">Citizen Channel</button>
-                         <button className="text-[11px] font-black uppercase tracking-[0.4em] text-heritage-sandstone hover:text-heritage-maroon pb-2">Internal Registry</button>
+                <footer className="p-4 border-t border-slate-100 bg-white shrink-0">
+                   <div className="max-w-3xl mx-auto space-y-3">
+                      
+                      {/* SMART AI SUGGESTIONS */}
+                      <div className="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar no-scrollbar">
+                         <div className="shrink-0 text-[8px] font-black text-heritage-sandstone uppercase tracking-widest mr-2 flex items-center gap-1"><Zap size={10} /> Smart Drafts:</div>
+                         {getContextSuggestions(selectedTicket).map((sugg, i) => (
+                           <button 
+                             key={i} 
+                             onClick={() => setReplyText(sugg)}
+                             className="shrink-0 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-full text-[9px] font-bold text-slate-500 hover:border-heritage-red hover:text-heritage-red transition-all whitespace-nowrap"
+                           >
+                             {sugg.length > 40 ? sugg.substring(0, 40) + '...' : sugg}
+                           </button>
+                         ))}
                       </div>
-                      <div className="parchment-card rounded-[3.5rem] overflow-hidden shadow-2xl border-2 border-heritage-sandstone/30">
+
+                      <div className="bg-slate-50 rounded-2xl border border-slate-200 focus-within:border-heritage-red transition-all shadow-inner overflow-hidden">
                         <textarea 
-                          className="w-full p-12 bg-transparent outline-none min-h-[160px] text-xl font-bold italic resize-none placeholder:text-heritage-sandstone/40"
-                          placeholder="Draft an official response..."
+                          className="w-full px-5 py-3 bg-transparent outline-none min-h-[60px] text-[13px] font-bold italic resize-none placeholder:text-slate-300"
+                          placeholder="Type professional reply..."
                           value={replyText} onChange={(e) => setReplyText(e.target.value)}
                         />
-                        <div className="flex justify-between items-center p-8 border-t border-heritage-sandstone/10 bg-white/30">
-                           <div className="flex gap-6 text-heritage-sandstone">
-                              <button className="hover:text-heritage-red transition-all"><ImageIcon size={22} /></button>
-                              <button className="hover:text-heritage-red transition-all"><Tag size={22} /></button>
+                        <div className="flex justify-between items-center px-4 py-2 bg-white/50 border-t border-slate-100">
+                           <div className="flex gap-2">
+                              <button className="p-1.5 text-slate-400 hover:text-heritage-red transition-colors"><ImageIcon size={14} /></button>
+                              <button className="p-1.5 text-slate-400 hover:text-heritage-red transition-colors"><Tag size={14} /></button>
                            </div>
-                           <div className="flex gap-4">
-                              <button onClick={handlePolish} disabled={isPolishing} className="px-8 py-4 bg-white border-2 border-heritage-sandstone text-heritage-maroon rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] flex items-center gap-3 shadow-lg hover:bg-heritage-parchment">
-                                 {isPolishing ? <Loader2 className="animate-spin" size={16} /> : <Zap size={16} />} AI Polish
+                           <div className="flex gap-2">
+                              <button onClick={handlePolish} disabled={isPolishing} className="px-3 py-1.5 bg-white border border-slate-200 text-heritage-maroon rounded-lg text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 hover:bg-slate-50 transition-all">
+                                 {isPolishing ? <Loader2 className="animate-spin" size={10} /> : <Zap size={10} />} Polish
                               </button>
-                              <button onClick={() => handleAction(ComplaintStatus.ACKNOWLEDGED, replyText)} className="px-12 py-4 bg-heritage-red text-heritage-parchment rounded-2xl text-[11px] font-black uppercase tracking-[0.4em] shadow-2xl hover:bg-heritage-maroon active:scale-95 transition-all flex items-center gap-3">
-                                 <Send size={18} /> Dispatch
+                              <button onClick={() => handleAction(ComplaintStatus.ACKNOWLEDGED, replyText)} className="px-5 py-1.5 bg-heritage-red text-heritage-parchment rounded-lg text-[8px] font-black uppercase tracking-widest hover:bg-heritage-maroon active:scale-95 transition-all flex items-center gap-2">
+                                 <Send size={12} /> Dispatch
                               </button>
                            </div>
                         </div>
@@ -429,71 +430,55 @@ const AdminTickets: React.FC<AdminProps> = ({ complaints: initialComplaints, use
                 </footer>
               </>
             ) : (
-              <div className="flex-grow flex flex-col items-center justify-center p-24 text-center space-y-8 opacity-20">
-                 <Building2 size={120} className="text-heritage-maroon" />
-                 <p className="text-[12px] font-black uppercase tracking-[0.8em] text-heritage-maroon">Select Official Record</p>
+              <div className="flex-grow flex flex-col items-center justify-center p-12 text-center space-y-4 bg-slate-50/10">
+                 <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-200">
+                    <Building2 size={40} />
+                 </div>
+                 <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300 italic">Select Ticket to Begin Redressal</p>
               </div>
             )}
           </main>
 
-          {/* 4. STRATEGIC CONTEXT */}
-          <aside className="w-[340px] bg-heritage-parchment border-l border-heritage-sandstone/30 flex flex-col shrink-0 overflow-y-auto custom-scrollbar p-10 space-y-12">
+          {/* 4. CLEANER CONTEXT SIDEBAR */}
+          <aside className="w-[280px] bg-white border-l border-slate-100 flex flex-col shrink-0 overflow-y-auto custom-scrollbar p-6 space-y-8 z-10">
             {selectedTicket ? (
               <>
-                 <section className="space-y-8">
-                    <h4 className="text-[11px] font-black uppercase text-heritage-sandstone tracking-[0.5em]">Citizen Dossier</h4>
-                    <div className="flex items-center gap-6">
-                       <div className="w-16 h-16 bg-white border-2 border-heritage-sandstone/30 rounded-2xl flex items-center justify-center font-black text-heritage-sandstone uppercase text-2xl shadow-lg">
+                 <section className="space-y-4">
+                    <h4 className="text-[8px] font-black uppercase text-slate-400 tracking-[0.4em] flex items-center gap-1.5">
+                      <Fingerprint size={10} /> Dossier
+                    </h4>
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                       <div className="w-8 h-8 bg-white border border-slate-200 rounded-lg flex items-center justify-center font-black text-slate-400 uppercase text-xs">
                          {selectedTicket.userName.charAt(0)}
                        </div>
-                       <div>
-                          <h3 className="text-sm font-black text-heritage-maroon uppercase leading-none tracking-tight">{selectedTicket.userName}</h3>
-                          <p className="text-[10px] font-black text-emerald-700 mt-2.5 flex items-center gap-1.5 uppercase tracking-widest">
-                             <Shield size={10} /> Verified Identity
+                       <div className="min-w-0">
+                          <h3 className="text-[11px] font-black text-heritage-maroon uppercase leading-none truncate">{selectedTicket.userName}</h3>
+                          <p className="text-[7px] font-black text-emerald-600 mt-1 uppercase flex items-center gap-1">
+                             <Shield size={8} /> Verified
                           </p>
-                       </div>
-                    </div>
-                    <div className="space-y-4">
-                       <div className="p-6 parchment-card rounded-3xl border border-heritage-sandstone/40">
-                          <p className="text-[10px] font-black text-heritage-sandstone uppercase tracking-widest mb-2">Transit Node</p>
-                          <p className="text-[12px] font-black text-heritage-maroon uppercase truncate leading-none">{selectedTicket.postOffice}</p>
                        </div>
                     </div>
                  </section>
 
-                 <section className="space-y-8">
-                    <h4 className="text-[11px] font-black uppercase text-heritage-sandstone tracking-[0.5em]">Neural Strategy</h4>
-                    <div className="space-y-4">
-                       {selectedTicket.analysis?.intelligenceBriefing?.investigationStrategy?.map((step, i) => (
-                         <div key={i} className="flex gap-4 items-start p-4 bg-white/40 rounded-2xl border border-heritage-sandstone/10 hover:border-heritage-red transition-all">
-                            <CheckCircle size={16} className="text-heritage-red shrink-0 mt-1" />
-                            <p className="text-[12px] font-bold text-heritage-ink uppercase tracking-tight leading-relaxed">{step}</p>
+                 <section className="space-y-4">
+                    <h4 className="text-[8px] font-black uppercase text-slate-400 tracking-[0.4em] flex items-center gap-1.5">
+                      <Target size={10} /> Strategy
+                    </h4>
+                    <div className="space-y-2">
+                       {selectedTicket.analysis?.intelligenceBriefing?.investigationStrategy?.slice(0, 3).map((step, i) => (
+                         <div key={i} className="flex gap-2 items-start p-2.5 bg-white rounded-xl border border-slate-100 hover:border-heritage-red transition-all group">
+                            <CheckCircle size={10} className="text-slate-200 group-hover:text-heritage-red shrink-0 mt-0.5" />
+                            <p className="text-[9px] font-bold text-slate-500 uppercase leading-normal">{step}</p>
                          </div>
                        ))}
                     </div>
                  </section>
 
-                 <section className="bg-heritage-maroon text-heritage-parchment p-10 rounded-[3.5rem] shadow-2xl relative overflow-hidden group">
-                    <div className="relative z-10 space-y-6">
-                       <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-heritage-parchment/60">Institutional Urgency</h4>
-                       <div className="text-6xl font-black text-white tracking-tighter">
-                          {selectedTicket.analysis?.priorityScore}%
-                       </div>
-                       <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                          <div className="h-full bg-heritage-red shadow-[0_0_15px_rgba(211,47,47,0.6)] transition-all duration-1000" style={{ width: `${selectedTicket.analysis?.priorityScore}%` }} />
-                       </div>
-                    </div>
-                 </section>
-
-                 <div className="pt-12 text-center opacity-20">
-                    <p className="text-[9px] font-black uppercase tracking-[0.8em] text-heritage-maroon">IP-Neural Node v4.0</p>
+                 <div className="pt-6 text-center border-t border-slate-100 mt-auto">
+                    <p className="text-[7px] font-black uppercase tracking-[0.4em] text-slate-200 italic">Dak-Command Node v4.5</p>
                  </div>
               </>
-            ) : (
-              <div className="p-12 text-center opacity-5">
-                 <Shield size={48} className="mx-auto" />
-              </div>
-            )}
+            ) : null}
           </aside>
         </>
       )}

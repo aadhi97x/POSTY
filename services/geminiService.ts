@@ -67,16 +67,14 @@ export const analyzeVoiceRecording = async (params: { base64Audio: string, mimeT
   const { base64Audio, mimeType } = params;
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash-native-audio-preview-09-2025",
+    model: "gemini-flash-latest",
     contents: {
       parts: [
         { inlineData: { mimeType: mimeType.split(";")[0], data: base64Audio } },
-        { text: `Analyze this India Post citizen recording:
-                 1. Transcribe the audio precisely.
-                 2. If the language is not English, translate it to professional English.
-                 3. Refine the text as a formal, official grievance description suitable for the India Post portal.
-                 4. Ensure tracking numbers (e.g., EB123456789IN) or office names are preserved.
-                 Output ONLY the final refined English text.` }
+        { text: `Transcribe this India Post citizen recording. 
+                 If the language is not English, translate it to natural English. 
+                 Keep the output direct and clear. Preserve tracking numbers (e.g. EB123456789IN).
+                 Output ONLY the transcribed/translated text.` }
       ],
     },
   });
@@ -235,7 +233,7 @@ export const generateSpeech = async (text: string): Promise<string | undefined> 
 export const findNearbyBranches = async (latitude: number, longitude: number) => {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash-native-audio-preview-09-2025", // Using multimodal flash for grounding tasks
+    model: "gemini-flash-latest",
     contents: "Find the 3 nearest India Post branches for the user based on their current location.",
     config: {
       tools: [{ googleMaps: {} }],
