@@ -247,23 +247,13 @@ const OfficialHeader = ({
       </div>
 
       <div className="py-10 px-4 md:px-12">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-10">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-10">
           <div className="flex items-center gap-8 shrink-0">
-            <StateEmblem className="h-28" />
+            <StateEmblem className="h-32" />
             <div className="h-20 w-px bg-heritage-sandstone"></div>
             <div className="flex flex-col">
               <PostyLogo className="h-16 text-heritage-maroon" />
-              <p className="text-[10px] md:text-xs font-black text-heritage-sandstone uppercase tracking-[0.4em] mt-2">Dignified Service Since 1854</p>
-            </div>
-          </div>
-          <div className="flex-grow max-w-lg w-full relative">
-            <div className="relative">
-              <input 
-                type="text" 
-                placeholder="Search Official Records..." 
-                className="w-full bg-white/50 border-2 border-heritage-sandstone py-4 px-8 outline-none focus:border-heritage-red transition-all font-bold text-heritage-ink rounded-full shadow-inner"
-              />
-              <Search className="absolute right-6 top-1/2 -translate-y-1/2 text-heritage-sandstone" size={24} />
+              <p className="text-[10px] md:text-xs font-black text-heritage-sandstone uppercase tracking-[0.4em] mt-2 italic">Your voice. Your language. Faster resolution.</p>
             </div>
           </div>
         </div>
@@ -283,9 +273,7 @@ const OfficialHeader = ({
               <>
                 <li><Link to="/" className="block py-5 px-6 hover:text-heritage-red transition-all border-b-4 border-transparent hover:border-heritage-red">Command Center</Link></li>
               </>
-            ) : (
-              <li><Link to="/login" className="block py-5 px-6 hover:text-heritage-red transition-all border-b-4 border-transparent hover:border-heritage-red">CITIZEN PORTAL</Link></li>
-            )}
+            ) : null}
           </ul>
           {user && (
             <div className="flex items-center gap-6 py-5 md:py-0">
@@ -407,9 +395,9 @@ const App: React.FC = () => {
               <p className="text-[12px] font-black uppercase tracking-[0.4em] font-brand">{t.footer_text}</p>
               <p className="text-[10px] opacity-60 font-bold uppercase tracking-widest">{t.footer_subtext}</p>
               <div className="pt-6 flex justify-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] opacity-40">
-                <a href="#">Privacy</a>
-                <a href="#">Terms</a>
-                <a href="#">Charter</a>
+                <Link to="/" className="hover:text-heritage-sandstone transition-colors">Privacy</Link>
+                <Link to="/" className="hover:text-heritage-sandstone transition-colors">Terms</Link>
+                <Link to="/" className="hover:text-heritage-sandstone transition-colors">Charter</Link>
               </div>
             </div>
           </footer>
