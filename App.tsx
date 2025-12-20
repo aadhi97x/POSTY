@@ -37,12 +37,13 @@ export const PostyLogo = ({ className = "h-12" }: { className?: string }) => (
 );
 
 export const StateEmblem = ({ className = "h-16" }: { className?: string }) => (
-  <svg viewBox="0 0 100 120" className={className} fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-    <path d="M50 10C55 10 60 15 60 25C60 35 55 40 50 40C45 40 40 35 40 25C40 15 45 10 50 10Z" />
-    <path d="M30 45H70L65 75C65 85 55 90 50 90C45 90 35 85 35 75L30 45Z" />
-    <rect x="20" y="95" width="60" height="5" rx="2" />
-    <text x="50" y="115" textAnchor="middle" fontSize="10" fontWeight="900">सत्यमेव जयते</text>
-  </svg>
+  <div className={`flex flex-col items-center justify-center ${className}`}>
+    <img 
+      src="https://media.discordapp.net/attachments/1440690702530117746/1451736834521567374/imgbin_df4c12dcbe922fb84d8e19becaf0d5a7.png?ex=694742c9&is=6945f149&hm=216234fb9752b13ecb8d71d2e60853bddd73cee167b5486a33212dacc9c358fe&=&format=webp&quality=lossless&width=548&height=930" 
+      alt="National Emblem of India" 
+      className="h-full object-contain"
+    />
+  </div>
 );
 
 // --- TRANSLATIONS ---
@@ -195,7 +196,13 @@ const translations = {
 };
 
 type Language = 'en' | 'hi';
-export const LangContext = createContext<{ lang: Language, setLang: (l: Language) => void, t: any }>({
+interface LangContextType {
+  lang: Language;
+  setLang: (l: Language) => void;
+  t: any;
+}
+
+export const LangContext = createContext<LangContextType>({
   lang: 'en',
   setLang: () => {},
   t: translations.en
@@ -242,7 +249,7 @@ const OfficialHeader = ({
       <div className="py-10 px-4 md:px-12">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-10">
           <div className="flex items-center gap-8 shrink-0">
-            <StateEmblem className="h-20 text-heritage-maroon" />
+            <StateEmblem className="h-28" />
             <div className="h-20 w-px bg-heritage-sandstone"></div>
             <div className="flex flex-col">
               <PostyLogo className="h-16 text-heritage-maroon" />
